@@ -1,5 +1,4 @@
-﻿using System;
-using Calculator;
+﻿using Calculator;
 
 namespace calculator
 {
@@ -14,7 +13,22 @@ namespace calculator
 
         public int Calc(SquareMatrix matrix)
         {
-            throw new NotImplementedException();
+            if (matrix is null) throw new DeterminantCalcException();
+
+            if (matrix.Size == 2) return matrix[0, 0] * matrix[1, 1] - matrix[0, 1] * matrix[1, 0];
+
+            var result = 0;
+
+            for (var x = 0; x < matrix.Size; x++)
+            {
+                var item = matrix[x, 0];
+                var sign = GetSign(x, 0);
+                var subMatrix = matrix.Reduce(x, 0);
+
+                result += item * sign * Calc(subMatrix);
+            }
+
+            return result;
         }
     }
 }
