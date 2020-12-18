@@ -6,6 +6,7 @@
 
         public SquareMatrix(int size)
         {
+            if (size < 2) throw new SquareMatrixException();
             _array = new int[size, size];
         }
 
@@ -14,6 +15,8 @@
             if (array is null) throw new SquareMatrixException();
 
             if (array.GetLength(0) != array.GetLength(1)) throw new SquareMatrixException();
+
+            if (array.GetLength(0) < 2) throw new SquareMatrixException();
 
             _array = array;
         }

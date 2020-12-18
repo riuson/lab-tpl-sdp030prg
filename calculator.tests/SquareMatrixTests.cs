@@ -47,6 +47,23 @@ namespace Calculator.Tests
         }
 
         [Test]
+        public void ShouldFailCreateMatrixFromTooSmallSize()
+        {
+            // Arrange & Act & Assert.
+            Assert.Throws<SquareMatrixException>(() => new SquareMatrix(1));
+        }
+
+        [Test]
+        public void ShouldFailCreateMatrixFromTooSmallArray()
+        {
+            // Arrange.
+            var array = new int[1, 1];
+
+            // Act & Assert.
+            Assert.Throws<SquareMatrixException>(() => new SquareMatrix(array));
+        }
+
+        [Test]
         public void ShouldFailCreateMatrixFromArrayNotSquare()
         {
             // Arrange.
