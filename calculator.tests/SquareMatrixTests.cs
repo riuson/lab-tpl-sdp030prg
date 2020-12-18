@@ -148,5 +148,131 @@ namespace Calculator.Tests
             // Assert.
             Assert.That(matrix[0, 2], Is.EqualTo(100));
         }
+
+        [Test]
+        public void ShouldCompareMatrixEquals()
+        {
+            // Arrange.
+            int[,] array1 =
+            {
+                {1, 2, 3},
+                {4, 5, 6},
+                {7, 8, 9}
+            };
+            int[,] array2 =
+            {
+                {1, 2, 3},
+                {4, 5, 6},
+                {7, 8, 9}
+            };
+            var matrix1 = new SquareMatrix(array1);
+            var matrix2 = new SquareMatrix(array2);
+            var expected = true;
+
+            // Act.
+            var actual = matrix1 == matrix2;
+
+            // Assert.
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void ShouldCompareMatrixNotEquals1()
+        {
+            // Arrange.
+            int[,] array1 =
+            {
+                {1, 2, 3},
+                {4, 5, 6},
+                {7, 8, 9}
+            };
+            int[,] array2 =
+            {
+                {1, 2, 3},
+                {4, 5, 6},
+                {7, 8, 0}
+            };
+            var matrix1 = new SquareMatrix(array1);
+            var matrix2 = new SquareMatrix(array2);
+            var expected = false;
+
+            // Act.
+            var actual = matrix1 == matrix2;
+
+            // Assert.
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void ShouldCompareMatrixNotEquals2()
+        {
+            // Arrange.
+            int[,] array1 =
+            {
+                {1, 2},
+                {4, 5}
+            };
+            int[,] array2 =
+            {
+                {1, 2, 3},
+                {4, 5, 6},
+                {7, 8, 9}
+            };
+            var matrix1 = new SquareMatrix(array1);
+            var matrix2 = new SquareMatrix(array2);
+            var expected = false;
+
+            // Act.
+            var actual = matrix1 == matrix2;
+
+            // Assert.
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void ShouldCompareMatrixNotEquals3()
+        {
+            // Arrange.
+            int[,] array2 =
+            {
+                {1, 2, 3},
+                {4, 5, 6},
+                {7, 8, 9}
+            };
+            SquareMatrix matrix1 = null;
+            var matrix2 = new SquareMatrix(array2);
+            var expected = false;
+
+            // Act.
+            var actual = matrix1 == matrix2;
+
+            // Assert.
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void ShouldReduceMatrix()
+        {
+            // Arrange.
+            int[,] array =
+            {
+                {1, 2, 3},
+                {4, 5, 6},
+                {7, 8, 9}
+            };
+            int[,] arrayReduced =
+            {
+                {1, 3},
+                {7, 9}
+            };
+            var matrix = new SquareMatrix(array);
+            var matrixExpected = new SquareMatrix(arrayReduced);
+
+            // Act.
+            var matrixActual = matrix.Reduce(1, 1);
+
+            // Assert.
+            Assert.That(matrixActual, Is.EqualTo(matrixExpected));
+        }
     }
 }

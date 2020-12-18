@@ -1,4 +1,6 @@
-﻿namespace Calculator
+﻿using System;
+
+namespace Calculator
 {
     public class SquareMatrix
     {
@@ -38,6 +40,11 @@
         }
 
         public int Size => _array.GetLength(0);
+
+        public SquareMatrix Reduce(int removeX, int removeY)
+        {
+            throw new NotImplementedException();
+        }
 
         private void ThrowOnInvalidOffset(int offset)
         {
