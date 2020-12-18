@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Calculator;
+using NUnit.Framework;
 
 namespace calculator.tests
 {
@@ -27,6 +28,47 @@ namespace calculator.tests
 
             // Act & Assert.
             return calc.GetSign(x, y);
+        }
+
+        [Test]
+        public void ShouldCalcDeterminantOfSize2()
+        {
+            // Arrange.
+            int[,] array =
+            {
+                {11, -3},
+                {-15, -2}
+            };
+            var matrix = new SquareMatrix(array);
+            var calc = new DeterminantCalc();
+            var expected = -67;
+
+            // Act.
+            var actual = calc.Calc(matrix);
+
+            // Assert.
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void ShouldCalcDeterminantOfSize3()
+        {
+            // Arrange.
+            int[,] array =
+            {
+                {1, -2, 3},
+                {4, 0, 6},
+                {-7, 8, 9}
+            };
+            var matrix = new SquareMatrix(array);
+            var calc = new DeterminantCalc();
+            var expected = 204;
+
+            // Act.
+            var actual = calc.Calc(matrix);
+
+            // Assert.
+            Assert.That(actual, Is.EqualTo(expected));
         }
     }
 }
