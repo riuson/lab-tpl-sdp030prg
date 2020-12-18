@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
 using Calculator;
 using NUnit.Framework;
 
@@ -6,6 +9,14 @@ namespace calculator.tests
 {
     internal class DeterminantCalcTests
     {
+        private Random _random = new Random();
+
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            _random = new Random();
+        }
+
         [TestCase(0, 0, ExpectedResult = 1)]
         [TestCase(1, 0, ExpectedResult = -1)]
         [TestCase(2, 0, ExpectedResult = 1)]
@@ -111,6 +122,105 @@ namespace calculator.tests
             var actual = calc.Calc(matrix);
 
             // Assert.
+        }
+
+        [Test]
+        public void ShouldCalcMultiple()
+        {
+            // Arrange.
+            int[,] array1 =
+            {
+                {11, -3},
+                {-15, -2}
+            };
+            int[,] array2 =
+            {
+                {1, -2, 3},
+                {4, 0, 6},
+                {-7, 8, 9}
+            };
+
+            var matrix1 = SquareMatrixFactory.Create(array1);
+            var matrix2 = SquareMatrixFactory.Create(array2);
+            var calc = new DeterminantCalc();
+            var expected = new[]
+            {
+                -67, 204
+            };
+
+            // Act.
+            var actual = calc.Calc(matrix1, matrix2);
+
+            // Assert.
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void ShouldCalcMultipleTask()
+        {
+            // Arrange.
+            int[,] array1 =
+            {
+                {11, -3},
+                {-15, -2}
+            };
+            int[,] array2 =
+            {
+                {1, -2, 3},
+                {4, 0, 6},
+                {-7, 8, 9}
+            };
+
+            var matrix1 = SquareMatrixFactory.Create(array1);
+            var matrix2 = SquareMatrixFactory.Create(array2);
+            var calc = new DeterminantCalc();
+            var expected = new[]
+            {
+                -67, 204
+            };
+
+            // Act.
+            var actualTask = calc.CalcAsync(CancellationToken.None, matrix1, matrix2);
+            actualTask.Wait();
+            var actual = actualTask.Result;
+
+            // Assert.
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void ShouldCalcMultipleTaskAndCancel()
+        {
+            // Arrange.
+            var matrices = Enumerable.Range(0, 20)
+                .Select(_ => CreateRandomMatrix(8))
+                .ToArray();
+            var calc = new DeterminantCalc();
+            var tokenSource = new CancellationTokenSource();
+            var sw = new Stopwatch();
+
+            // Act.
+            sw.Start();
+            var actualTask = calc.CalcAsync(tokenSource.Token, matrices);
+            Thread.Sleep(1000);
+            tokenSource.Cancel();
+            actualTask.Wait();
+            sw.Stop();
+            var actual = actualTask.Result;
+
+            // Assert.
+            Assert.That(sw.Elapsed, Is.LessThan(TimeSpan.FromSeconds(2)));
+        }
+
+        private SquareMatrix CreateRandomMatrix(int size)
+        {
+            var matrix = SquareMatrixFactory.Create(size);
+
+            for (var x = 0; x < size; x++)
+            for (var y = 0; y < size; y++)
+                matrix[x, y] = _random.Next(0, 10);
+
+            return matrix;
         }
     }
 }

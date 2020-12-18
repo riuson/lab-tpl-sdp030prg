@@ -1,4 +1,5 @@
-﻿using Calculator;
+﻿using System;
+using Calculator;
 
 namespace calculator
 {
@@ -29,6 +30,11 @@ namespace calculator
             }
 
             return result;
+        }
+
+        public int[] Calc(SquareMatrix matrix1, params SquareMatrix[] matrices)
+        {
+            throw new NotImplementedException();
         }
     }
 }
