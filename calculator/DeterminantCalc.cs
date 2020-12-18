@@ -35,6 +35,46 @@ namespace calculator
             return result;
         }
 
+        public Task<int> CalcInTask(SquareMatrix matrix, CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (matrix is null) throw new DeterminantCalcException();
+
+            if (matrix.Size < 4) return Task.FromResult(Calc(matrix));
+
+            var tasks = new List<Task<int>>();
+
+            for (var x = 0; x < matrix.Size; x++)
+            {
+                token.ThrowIfCancellationRequested();
+
+                var item = matrix[x, 0];
+                var sign = GetSign(x, 0);
+                var subMatrix = matrix.Reduce(x, 0);
+                var calcItem = new CalcItem(item, sign, subMatrix);
+
+                var task = new Task<int>(
+                    o =>
+                    {
+                        var ci = (CalcItem) o;
+                        var subTask = CalcInTask(ci.Matrix, token);
+                        subTask.Wait(token);
+                        return subTask.Result * ci.Item * ci.Sign;
+                    },
+                    calcItem,
+                    token,
+                    TaskCreationOptions.LongRunning
+                );
+                task.Start();
+                tasks.Add(task);
+            }
+
+            var t1 = Task<int>.Factory.ContinueWhenAll(tasks.ToArray(), ts => { return ts.Sum(x => x.Result); });
+
+            return t1;
+        }
+
         public int[] Calc(SquareMatrix matrix1, params SquareMatrix[] matrices)
         {
             var tasks = new List<Task<int>>();
@@ -75,6 +115,20 @@ namespace calculator
                 ts => { return ts.Select(x => x.Result).ToArray(); },
                 token);
             return resultTask;
+        }
+
+        private class CalcItem
+        {
+            public CalcItem(int item, int sign, SquareMatrix matrix)
+            {
+                Item = item;
+                Sign = sign;
+                Matrix = matrix;
+            }
+
+            public int Item { get; }
+            public int Sign { get; }
+            public SquareMatrix Matrix { get; }
         }
     }
 }

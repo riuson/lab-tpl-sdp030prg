@@ -94,6 +94,81 @@ namespace calculator.tests
             Assert.That(actual, Is.EqualTo(expected));
         }
 
+        [Test]
+        public void ShouldCalcDeterminantOfSize3InTask()
+        {
+            // Arrange.
+            int[,] array =
+            {
+                {1, -2, 3},
+                {4, 0, 6},
+                {-7, 8, 9}
+            };
+            var matrix = SquareMatrixFactory.Create(array);
+            var calc = new DeterminantCalc();
+            var expected = 204;
+
+            // Act.
+            var task = calc.CalcInTask(matrix, CancellationToken.None);
+            task.Wait();
+            var actual = task.Result;
+
+            // Assert.
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [TestCase(8)]
+        public void ShouldCalcDeterminantInTask(int size)
+        {
+            // Arrange.
+            var random = new Random();
+            var matrix = SquareMatrixFactory.Create(size);
+
+            for (var x = 0; x < size; x++)
+            for (var y = 0; y < size; y++)
+                matrix[x, y] = random.Next(0, 10);
+
+            var calc = new DeterminantCalc();
+
+            // Act.
+            var task = calc.CalcInTask(matrix, CancellationToken.None);
+            task.Wait();
+
+            // Assert.
+            Console.WriteLine(task.Result);
+        }
+
+        [TestCase(8)]
+        public void CompareCalculationTime(int size)
+        {
+            // Arrange.
+            var random = new Random();
+            var matrix = SquareMatrixFactory.Create(size);
+            var sw = new Stopwatch();
+
+            for (var x = 0; x < size; x++)
+            for (var y = 0; y < size; y++)
+                matrix[x, y] = random.Next(0, 10);
+
+            var calc = new DeterminantCalc();
+
+            // Act.
+            sw.Start();
+            var task = calc.CalcInTask(matrix, CancellationToken.None);
+            task.Wait();
+            sw.Stop();
+            var timeOfTask = sw.Elapsed;
+
+            sw.Restart();
+            calc.Calc(matrix);
+            sw.Stop();
+            var timePlain = sw.Elapsed;
+
+            // Assert.
+            Console.WriteLine($"Time in task: {timeOfTask}");
+            Console.WriteLine($"Time plain:   {timePlain}");
+        }
+
         [TestCase(4)]
         [TestCase(5)]
         [TestCase(6)]
