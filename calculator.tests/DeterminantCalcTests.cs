@@ -31,6 +31,16 @@ namespace calculator.tests
         }
 
         [Test]
+        public void ShouldFailOnNull()
+        {
+            // Arrange.
+            var calc = new DeterminantCalc();
+
+            // Act & Assert.
+            Assert.Throws<DeterminantCalcException>(() => calc.Calc(null));
+        }
+
+        [Test]
         public void ShouldCalcDeterminantOfSize2()
         {
             // Arrange.
