@@ -11,7 +11,7 @@ namespace Calculator.Tests
             var size = 4;
 
             // Act.
-            var matrix = new SquareMatrix(size);
+            var matrix = SquareMatrixFactory.Create(size);
 
             // Assert.
             Assert.That(matrix.Size, Is.EqualTo(size));
@@ -30,7 +30,7 @@ namespace Calculator.Tests
             var expectedSize = 3;
 
             // Act.
-            var matrix = new SquareMatrix(array);
+            var matrix = SquareMatrixFactory.Create(array);
 
             // Assert.
             Assert.That(matrix.Size, Is.EqualTo(expectedSize));
@@ -43,14 +43,14 @@ namespace Calculator.Tests
             int[,] array = null;
 
             // Act & Assert.
-            Assert.Throws<SquareMatrixException>(() => new SquareMatrix(array));
+            Assert.Throws<SquareMatrixException>(() => SquareMatrixFactory.Create(array));
         }
 
         [Test]
         public void ShouldFailCreateMatrixFromTooSmallSize()
         {
             // Arrange & Act & Assert.
-            Assert.Throws<SquareMatrixException>(() => new SquareMatrix(1));
+            Assert.Throws<SquareMatrixException>(() => SquareMatrixFactory.Create(1));
         }
 
         [Test]
@@ -60,7 +60,7 @@ namespace Calculator.Tests
             var array = new int[1, 1];
 
             // Act & Assert.
-            Assert.Throws<SquareMatrixException>(() => new SquareMatrix(array));
+            Assert.Throws<SquareMatrixException>(() => SquareMatrixFactory.Create(array));
         }
 
         [Test]
@@ -70,7 +70,7 @@ namespace Calculator.Tests
             var array = new int[4, 6];
 
             // Act & Assert.
-            Assert.Throws<SquareMatrixException>(() => new SquareMatrix(array));
+            Assert.Throws<SquareMatrixException>(() => SquareMatrixFactory.Create(array));
         }
 
         [TestCase(-1, 0)]
@@ -82,7 +82,7 @@ namespace Calculator.Tests
         public void ShouldFailOnInvalidOffsetGet(int x, int y)
         {
             // Arrange.
-            var matrix = new SquareMatrix(3);
+            var matrix = SquareMatrixFactory.Create(3);
 
             // Act & Assert.
             Assert.Throws<SquareMatrixException>(() =>
@@ -100,7 +100,7 @@ namespace Calculator.Tests
         public void ShouldFailOnInvalidOffsetSet(int x, int y)
         {
             // Arrange.
-            var matrix = new SquareMatrix(3);
+            var matrix = SquareMatrixFactory.Create(3);
 
             // Act & Assert.
             Assert.Throws<SquareMatrixException>(() => { matrix[x, y] = 0; });
@@ -116,7 +116,7 @@ namespace Calculator.Tests
                 {4, 5, 6},
                 {7, 8, 9}
             };
-            var matrix = new SquareMatrix(array);
+            var matrix = SquareMatrixFactory.Create(array);
 
             // Act & Assert.
             Assert.That(matrix[0, 0], Is.EqualTo(1));
@@ -140,7 +140,7 @@ namespace Calculator.Tests
                 {4, 5, 6},
                 {7, 8, 9}
             };
-            var matrix = new SquareMatrix(array);
+            var matrix = SquareMatrixFactory.Create(array);
 
             // Act.
             matrix[0, 2] = 100;
@@ -165,8 +165,8 @@ namespace Calculator.Tests
                 {4, 5, 6},
                 {7, 8, 9}
             };
-            var matrix1 = new SquareMatrix(array1);
-            var matrix2 = new SquareMatrix(array2);
+            var matrix1 = SquareMatrixFactory.Create(array1);
+            var matrix2 = SquareMatrixFactory.Create(array2);
             var expected = true;
 
             // Act.
@@ -192,8 +192,8 @@ namespace Calculator.Tests
                 {4, 5, 6},
                 {7, 8, 0}
             };
-            var matrix1 = new SquareMatrix(array1);
-            var matrix2 = new SquareMatrix(array2);
+            var matrix1 = SquareMatrixFactory.Create(array1);
+            var matrix2 = SquareMatrixFactory.Create(array2);
             var expected = false;
 
             // Act.
@@ -218,8 +218,8 @@ namespace Calculator.Tests
                 {4, 5, 6},
                 {7, 8, 9}
             };
-            var matrix1 = new SquareMatrix(array1);
-            var matrix2 = new SquareMatrix(array2);
+            var matrix1 = SquareMatrixFactory.Create(array1);
+            var matrix2 = SquareMatrixFactory.Create(array2);
             var expected = false;
 
             // Act.
@@ -240,7 +240,7 @@ namespace Calculator.Tests
                 {7, 8, 9}
             };
             SquareMatrix matrix1 = null;
-            var matrix2 = new SquareMatrix(array2);
+            var matrix2 = SquareMatrixFactory.Create(array2);
             var expected = false;
 
             // Act.
@@ -251,7 +251,7 @@ namespace Calculator.Tests
         }
 
         [Test]
-        public void ShouldReduceMatrix()
+        public void ShouldReduceMatrix1()
         {
             // Arrange.
             int[,] array =
@@ -265,14 +265,89 @@ namespace Calculator.Tests
                 {1, 3},
                 {7, 9}
             };
-            var matrix = new SquareMatrix(array);
-            var matrixExpected = new SquareMatrix(arrayReduced);
+            var matrix = SquareMatrixFactory.Create(array);
+            var matrixExpected = SquareMatrixFactory.Create(arrayReduced);
 
             // Act.
             var matrixActual = matrix.Reduce(1, 1);
 
             // Assert.
             Assert.That(matrixActual, Is.EqualTo(matrixExpected));
+        }
+
+        [Test]
+        public void ShouldReduceMatrix2()
+        {
+            // Arrange.
+            int[,] array =
+            {
+                {1, 2, 3},
+                {4, 5, 6},
+                {7, 8, 9}
+            };
+            int[,] arrayReduced =
+            {
+                {5, 6},
+                {8, 9}
+            };
+            var matrix = SquareMatrixFactory.Create(array);
+            var matrixExpected = SquareMatrixFactory.Create(arrayReduced);
+
+            // Act.
+            var matrixActual = matrix.Reduce(0, 0);
+
+            // Assert.
+            Assert.That(matrixActual, Is.EqualTo(matrixExpected));
+        }
+
+        [Test]
+        public void ShouldReduceMatrix3()
+        {
+            // Arrange.
+            int[,] array =
+            {
+                {1, 2, 3},
+                {4, 5, 6},
+                {7, 8, 9}
+            };
+            int[,] arrayReduced =
+            {
+                {4, 6},
+                {7, 9}
+            };
+            var matrix = SquareMatrixFactory.Create(array);
+            var matrixExpected = SquareMatrixFactory.Create(arrayReduced);
+
+            // Act.
+            var matrixActual = matrix.Reduce(1, 0);
+
+            // Assert.
+            Assert.That(matrixActual, Is.EqualTo(matrixExpected));
+        }
+
+        [Test]
+        public void ShouldReduceMatrix4()
+        {
+            // Arrange.
+            int[,] array =
+            {
+                {1, 2, 3},
+                {4, 5, 6},
+                {7, 8, 9}
+            };
+            int[,] arrayReduced =
+            {
+                {4, 5},
+                {7, 8}
+            };
+            var matrix = SquareMatrixFactory.Create(array);
+            var matrixExpected = SquareMatrixFactory.Create(arrayReduced);
+
+            // Act.
+            var matrixActual = matrix.Reduce(2, 0);
+
+            // Assert.
+            Assert.That(matrixActual == matrixExpected, Is.True);
         }
     }
 }

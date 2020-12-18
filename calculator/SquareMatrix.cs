@@ -1,24 +1,10 @@
 ﻿namespace Calculator
 {
-    public class SquareMatrix
+    public abstract class SquareMatrix
     {
-        private readonly int[,] _array;
-
-        public SquareMatrix(int size)
+        internal SquareMatrix(int size)
         {
-            if (size < 2) throw new SquareMatrixException();
-            _array = new int[size, size];
-        }
-
-        public SquareMatrix(int[,] array)
-        {
-            if (array is null) throw new SquareMatrixException();
-
-            if (array.GetLength(0) != array.GetLength(1)) throw new SquareMatrixException();
-
-            if (array.GetLength(0) < 2) throw new SquareMatrixException();
-
-            _array = array;
+            Size = size;
         }
 
         public int this[int x, int y]
@@ -27,45 +13,23 @@
             {
                 ThrowOnInvalidOffset(x);
                 ThrowOnInvalidOffset(y);
-                return _array[y, x];
+                return GetMatrixItem(x, y);
             }
             set
             {
                 ThrowOnInvalidOffset(x);
                 ThrowOnInvalidOffset(y);
-                _array[y, x] = value;
+                SetMatrixItem(x, y, value);
             }
         }
 
-        public int Size => _array.GetLength(0);
+        public int Size { get; }
 
-        public SquareMatrix Reduce(int removeX, int removeY)
-        {
-            if (Size < 3) throw new SquareMatrixException();
+        protected abstract int GetMatrixItem(int x, int y);
 
-            ThrowOnInvalidOffset(removeX);
-            ThrowOnInvalidOffset(removeY);
+        protected abstract void SetMatrixItem(int x, int y, in int value);
 
-            var result = new SquareMatrix(Size - 1);
-
-            for (int y1 = 0, y2 = 0; y1 < Size; y1++)
-            {
-                if (y1 == removeY) continue;
-
-                for (int x1 = 0, x2 = 0; x1 < Size; x1++)
-                {
-                    if (x1 == removeX) continue;
-
-                    result[x2, y2] = this[x1, y1];
-
-                    x2++;
-                }
-
-                y2++;
-            }
-
-            return result;
-        }
+        public abstract SquareMatrix Reduce(int removeX, int removeY);
 
         private void ThrowOnInvalidOffset(int offset)
         {
@@ -74,9 +38,9 @@
 
         public override bool Equals(object? obj)
         {
-            if (!(obj is SquareMatrix sqm)) return false;
+            if (!(obj is SquareMatrix sqmb)) return false;
 
-            return this == sqm;
+            return this == sqmb;
         }
 
         public override int GetHashCode()
@@ -103,6 +67,95 @@
         public static bool operator !=(SquareMatrix matrix1, SquareMatrix matrix2)
         {
             return !(matrix1 == matrix2);
+        }
+    }
+
+    internal class SquareMatrixSource : SquareMatrix
+    {
+        private readonly int[,] _array;
+
+        public SquareMatrixSource(int size) : base(size)
+        {
+            if (size < 2) throw new SquareMatrixException();
+            _array = new int[size, size];
+        }
+
+        protected override int GetMatrixItem(int x, int y)
+        {
+            return _array[y, x];
+        }
+
+        protected override void SetMatrixItem(int x, int y, in int value)
+        {
+            _array[y, x] = value;
+        }
+
+        public override SquareMatrix Reduce(int removeX, int removeY)
+        {
+            return new SquareMatrixReducedProxy(this, removeX, removeY);
+        }
+    }
+
+    internal class SquareMatrixReducedProxy : SquareMatrix
+    {
+        private readonly int _removeX;
+        private readonly int _removeY;
+        private readonly SquareMatrix _source;
+
+        public SquareMatrixReducedProxy(SquareMatrix source, int removeX, int removeY) : base(source.Size - 1)
+        {
+            _source = source;
+            _removeX = removeX;
+            _removeY = removeY;
+        }
+
+        protected override int GetMatrixItem(int x, int y)
+        {
+            var sourceX = x < _removeX ? x : x + 1;
+            var sourceY = y < _removeY ? y : y + 1;
+            return _source[sourceX, sourceY];
+        }
+
+        protected override void SetMatrixItem(int x, int y, in int value)
+        {
+            var sourceX = x < _removeX ? x : x + 1;
+            var sourceY = y < _removeY ? y : y + 1;
+            _source[sourceX, sourceY] = value;
+        }
+
+        public override SquareMatrix Reduce(int removeX, int removeY)
+        {
+            return new SquareMatrixReducedProxy(this, removeX, removeY);
+        }
+    }
+
+    public static class SquareMatrixFactory
+    {
+        public static SquareMatrix Create(int size)
+        {
+            return new SquareMatrixSource(size);
+        }
+
+        public static SquareMatrix Create(int[,] array)
+        {
+            if (array is null) throw new SquareMatrixException();
+
+            if (array.Rank != 2) throw new SquareMatrixException();
+
+            var size1 = array.GetLength(0);
+            var size2 = array.GetLength(1);
+
+            if (size1 != size2) throw new SquareMatrixException();
+
+            if (size1 < 2) throw new SquareMatrixException();
+
+            var result = new SquareMatrixSource(array.GetLength(0));
+
+            for (var x = 0; x < size1; x++)
+            for (var y = 0; y < size1; y++)
+                result[x, y] = array[y, x];
+
+            return result;
         }
     }
 }
