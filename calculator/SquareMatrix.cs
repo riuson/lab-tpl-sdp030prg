@@ -7,34 +7,11 @@
             Size = size;
         }
 
-        public int this[int x, int y]
-        {
-            get
-            {
-                ThrowOnInvalidOffset(x);
-                ThrowOnInvalidOffset(y);
-                return GetMatrixItem(x, y);
-            }
-            set
-            {
-                ThrowOnInvalidOffset(x);
-                ThrowOnInvalidOffset(y);
-                SetMatrixItem(x, y, value);
-            }
-        }
+        public abstract int this[int x, int y] { get; set; }
 
         public int Size { get; }
 
-        protected abstract int GetMatrixItem(int x, int y);
-
-        protected abstract void SetMatrixItem(int x, int y, in int value);
-
         public abstract SquareMatrix Reduce(int removeX, int removeY);
-
-        private void ThrowOnInvalidOffset(int offset)
-        {
-            if (offset < 0 || offset >= Size) throw new SquareMatrixException();
-        }
 
         public override bool Equals(object? obj)
         {
@@ -80,19 +57,30 @@
             _array = new int[size, size];
         }
 
-        protected override int GetMatrixItem(int x, int y)
+        public override int this[int x, int y]
         {
-            return _array[y, x];
-        }
-
-        protected override void SetMatrixItem(int x, int y, in int value)
-        {
-            _array[y, x] = value;
+            get
+            {
+                ThrowOnInvalidOffset(x);
+                ThrowOnInvalidOffset(y);
+                return _array[x, y];
+            }
+            set
+            {
+                ThrowOnInvalidOffset(x);
+                ThrowOnInvalidOffset(y);
+                _array[x, y] = value;
+            }
         }
 
         public override SquareMatrix Reduce(int removeX, int removeY)
         {
             return new SquareMatrixReducedProxy(this, removeX, removeY);
+        }
+
+        private void ThrowOnInvalidOffset(int offset)
+        {
+            if (offset < 0 || offset >= Size) throw new SquareMatrixException();
         }
     }
 
@@ -109,18 +97,20 @@
             _removeY = removeY;
         }
 
-        protected override int GetMatrixItem(int x, int y)
+        public override int this[int x, int y]
         {
-            var sourceX = x < _removeX ? x : x + 1;
-            var sourceY = y < _removeY ? y : y + 1;
-            return _source[sourceX, sourceY];
-        }
-
-        protected override void SetMatrixItem(int x, int y, in int value)
-        {
-            var sourceX = x < _removeX ? x : x + 1;
-            var sourceY = y < _removeY ? y : y + 1;
-            _source[sourceX, sourceY] = value;
+            get
+            {
+                var sourceX = x < _removeX ? x : x + 1;
+                var sourceY = y < _removeY ? y : y + 1;
+                return _source[sourceX, sourceY];
+            }
+            set
+            {
+                var sourceX = x < _removeX ? x : x + 1;
+                var sourceY = y < _removeY ? y : y + 1;
+                _source[sourceX, sourceY] = value;
+            }
         }
 
         public override SquareMatrix Reduce(int removeX, int removeY)
