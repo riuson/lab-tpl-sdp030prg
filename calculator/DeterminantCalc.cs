@@ -1,12 +1,12 @@
-﻿using System;
-
-namespace calculator
+﻿namespace calculator
 {
     public class DeterminantCalc
     {
-        public int GetSign(in int i, in int i1)
+        public int GetSign(int x, int y)
         {
-            throw new NotImplementedException();
+            return ((x & 1) == 0 ? 1 : -1)
+                   *
+                   ((y & 1) == 0 ? 1 : -1);
         }
     }
 }

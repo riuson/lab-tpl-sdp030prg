@@ -20,7 +20,7 @@ namespace calculator.tests
         [TestCase(1, 3, ExpectedResult = 1)]
         [TestCase(2, 3, ExpectedResult = -1)]
         [TestCase(3, 3, ExpectedResult = 1)]
-        public int CanGetSign(int x, int y)
+        public int ShouldGetSign(int x, int y)
         {
             // Arrange.
             var calc = new DeterminantCalc();
