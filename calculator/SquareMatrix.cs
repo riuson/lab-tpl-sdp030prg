@@ -1,24 +1,44 @@
-﻿using System;
-
-namespace Calculator
+﻿namespace Calculator
 {
     public class SquareMatrix
     {
+        private readonly int[,] _array;
+
         public SquareMatrix(int size)
         {
+            _array = new int[size, size];
         }
 
         public SquareMatrix(int[,] array)
         {
-            throw new NotImplementedException();
+            if (array is null) throw new SquareMatrixException();
+
+            if (array.GetLength(0) != array.GetLength(1)) throw new SquareMatrixException();
+
+            _array = array;
         }
 
         public int this[int x, int y]
         {
-            get => throw new NotImplementedException();
-            set => throw new NotImplementedException();
+            get
+            {
+                ThrowOnInvalidOffset(x);
+                ThrowOnInvalidOffset(y);
+                return _array[y, x];
+            }
+            set
+            {
+                ThrowOnInvalidOffset(x);
+                ThrowOnInvalidOffset(y);
+                _array[y, x] = value;
+            }
         }
 
-        public int Size => throw new NotImplementedException();
+        public int Size => _array.GetLength(0);
+
+        private void ThrowOnInvalidOffset(int offset)
+        {
+            if (offset < 0 || offset >= Size) throw new SquareMatrixException();
+        }
     }
 }
