@@ -143,12 +143,18 @@ namespace Calculator.Tests {
             Console.WriteLine(task.Result);
         }
 
-        [TestCase(5)]
-        [TestCase(8)]
-        [TestCase(9)]
-        public void CompareCalculationTime(int size) {
+        [TestCase(5, 10)]
+        [TestCase(8, 10)]
+        [TestCase(9, 10)]
+        [TestCase(5, 20)]
+        [TestCase(8, 20)]
+        [TestCase(9, 20)]
+        [TestCase(9, 80)]
+        [TestCase(10, 10)]
+        [TestCase(6, 800)]
+        public void CompareCalculationTime(int size, int count) {
             // Arrange.
-            var matrices = Enumerable.Range(0, 10)
+            var matrices = Enumerable.Range(0, count)
                 .Select(_ => this.CreateRandomMatrix(size))
                 .ToArray();
             var calc = new DeterminantCalc();

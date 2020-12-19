@@ -27,14 +27,29 @@ namespace Calculator {
         public Task<long[]> CalcManyAsync(CancellationToken token, params SquareMatrix[] matrices) {
             var tasks = new List<Task<long>>();
 
-            Task<long> startCalc(SquareMatrix matrix) {
+            Task<long> startCalcTask(SquareMatrix matrix) {
                 return Task<long>.Factory.StartNew(
-                    o => this.CalcPrivate(token, (SquareMatrix) o),
+                    o => {
+                        //Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
+                        return this.CalcPrivate(token, (SquareMatrix) o);
+                    },
                     matrix,
                     token);
             }
 
-            tasks.AddRange(matrices.Select(startCalc));
+            Task<long> startCalcThread(SquareMatrix matrix) {
+                return Task<long>.Factory.StartNew(
+                    o => {
+                        //Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
+                        return this.CalcPrivate(token, (SquareMatrix) o);
+                    },
+                    matrix,
+                    token,
+                    TaskCreationOptions.LongRunning,
+                    TaskScheduler.Default);
+            }
+
+            tasks.AddRange(matrices.Select(startCalcTask));
 
             var resultTask = Task.Factory.ContinueWhenAll(
                 tasks.ToArray(),
