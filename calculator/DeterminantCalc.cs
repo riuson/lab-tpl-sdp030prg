@@ -75,15 +75,24 @@ namespace Calculator {
             }
 
             if (matrix.Size == 2) {
-                return matrix[0, 0] * matrix[1, 1]
-                       -
-                       matrix[0, 1] * matrix[1, 0];
+                return this.CalcMatrixOfSize2(matrix);
             }
 
             var layersMap = Enumerable.Range(0, matrix.Size - 1)
                 .Select(x => new CalcLayer(x + 2))
                 .ToDictionary(x => x.Size);
 
+            var rootItem = this.CreateTree(matrix, layersMap, token);
+
+            this.CalcTree(layersMap, token);
+
+            return rootItem.Result;
+        }
+
+        private CalcItem CreateTree(
+            SquareMatrix matrix,
+            Dictionary<int, CalcLayer> layersMap,
+            CancellationToken token) {
             var currentSize = matrix.Size;
             var rootItem = new CalcItem(currentSize, 1, 1, matrix);
             layersMap[matrix.Size].Items.Add(rootItem);
@@ -94,6 +103,7 @@ namespace Calculator {
 
                 foreach (var calcItem in currentLayer.Items) {
                     for (var i = 0; i < currentSize; i++) {
+                        token.ThrowIfCancellationRequested();
                         var subCalcItem = new CalcItem(
                             calcItem.Size - 1,
                             calcItem.Matrix[i, 0],
@@ -107,6 +117,12 @@ namespace Calculator {
                 currentSize--;
             } while (currentSize > 2);
 
+            return rootItem;
+        }
+
+        private void CalcTree(
+            Dictionary<int, CalcLayer> layersMap,
+            CancellationToken token) {
             token.ThrowIfCancellationRequested();
             var layersAscending = layersMap.OrderBy(x => x.Key).Select(x => x.Value);
 
@@ -117,16 +133,17 @@ namespace Calculator {
                     token.ThrowIfCancellationRequested();
 
                     if (layer.Size == 2) {
-                        calcItem.Result = calcItem.Matrix[0, 0] * calcItem.Matrix[1, 1] -
-                                          calcItem.Matrix[0, 1] * calcItem.Matrix[1, 0];
+                        calcItem.Result = this.CalcMatrixOfSize2(calcItem.Matrix);
                     } else {
                         calcItem.Result = calcItem.SubItems.Sum(x => x.Item * x.Sign * x.Result);
                     }
                 }
             }
-
-            return rootItem.Result;
         }
+
+        private int CalcMatrixOfSize2(SquareMatrix matrix) =>
+            matrix[0, 0] * matrix[1, 1] -
+            matrix[0, 1] * matrix[1, 0];
 
         private class CalcItem {
             public CalcItem(int size, long item, int sign, SquareMatrix matrix) {
