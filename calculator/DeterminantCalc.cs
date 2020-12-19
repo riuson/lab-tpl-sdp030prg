@@ -43,36 +43,34 @@ namespace calculator
 
             if (matrix.Size < 4) return Task.FromResult(Calc(matrix));
 
-            var tasks = new List<Task<int>>();
+            var layersMap = Enumerable.Range(0, matrix.Size - 1)
+                .Select(x => new CalcLayer(x + 2))
+                .ToDictionary(x => x.Size);
 
-            for (var x = 0; x < matrix.Size; x++)
+            CalcItem createCalcItem(int item, int sign, SquareMatrix matrix)
             {
-                token.ThrowIfCancellationRequested();
+                var result = new CalcItem(matrix.Size, item, sign, matrix);
+                layersMap[matrix.Size].Items.Add(result);
 
-                var item = matrix[x, 0];
-                var sign = GetSign(x, 0);
-                var subMatrix = matrix.Reduce(x, 0);
-                var calcItem = new CalcItem(item, sign, subMatrix);
+                if (matrix.Size > 2)
+                    for (var i = 0; i < matrix.Size; i++)
+                        result.SubItems.Add(createCalcItem(matrix[i, 0], GetSign(i, 0), matrix.Reduce(i, 0)));
 
-                var task = new Task<int>(
-                    o =>
-                    {
-                        var ci = (CalcItem) o;
-                        var subTask = CalcInTask(ci.Matrix, token);
-                        subTask.Wait(token);
-                        return subTask.Result * ci.Item * ci.Sign;
-                    },
-                    calcItem,
-                    token,
-                    TaskCreationOptions.LongRunning
-                );
-                task.Start();
-                tasks.Add(task);
+                return result;
             }
 
-            var t1 = Task<int>.Factory.ContinueWhenAll(tasks.ToArray(), ts => { return ts.Sum(x => x.Result); });
+            var rootItem = createCalcItem(1, 1, matrix);
 
-            return t1;
+            var layersAscending = layersMap.OrderBy(x => x.Key).Select(x => x.Value);
+
+            foreach (var layer in layersAscending)
+            foreach (var calcItem in layer.Items)
+                if (layer.Size == 2)
+                    calcItem.Result = Calc(calcItem.Matrix);
+                else
+                    calcItem.Result = calcItem.SubItems.Sum(x => x.Item * x.Sign * x.Result);
+
+            return Task.FromResult(rootItem.Result);
         }
 
         public int[] Calc(SquareMatrix matrix1, params SquareMatrix[] matrices)
@@ -119,16 +117,38 @@ namespace calculator
 
         private class CalcItem
         {
-            public CalcItem(int item, int sign, SquareMatrix matrix)
+            public CalcItem(int size, int item, int sign, SquareMatrix matrix)
             {
+                Size = size;
                 Item = item;
                 Sign = sign;
                 Matrix = matrix;
             }
 
+            public int Size { get; }
             public int Item { get; }
             public int Sign { get; }
             public SquareMatrix Matrix { get; }
+
+            public List<CalcItem> SubItems { get; } = new List<CalcItem>();
+
+            public int Result { get; set; }
+        }
+
+        private class CalcLayer
+        {
+            public CalcLayer(int size)
+            {
+                Size = size;
+            }
+
+            public int Size { get; }
+            public List<CalcItem> Items { get; } = new List<CalcItem>();
+
+            public override string ToString()
+            {
+                return $"Size: {Size}, Items Count: {Items.Count}";
+            }
         }
     }
 }

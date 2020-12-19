@@ -138,7 +138,9 @@ namespace calculator.tests
             Console.WriteLine(task.Result);
         }
 
+        [TestCase(5)]
         [TestCase(8)]
+        [TestCase(9)]
         public void CompareCalculationTime(int size)
         {
             // Arrange.

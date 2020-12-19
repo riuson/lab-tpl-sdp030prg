@@ -45,6 +45,11 @@
         {
             return !(matrix1 == matrix2);
         }
+
+        public override string ToString()
+        {
+            return $"{Size} x {Size}";
+        }
     }
 
     internal class SquareMatrixSource : SquareMatrix
