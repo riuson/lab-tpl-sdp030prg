@@ -48,11 +48,13 @@ namespace Calculator {
                 .ToDictionary(x => x.Size);
 
             CalcItem createCalcItem(int item, int sign, SquareMatrix matrix) {
+                token.ThrowIfCancellationRequested();
                 var result = new CalcItem(matrix.Size, item, sign, matrix);
                 layersMap[matrix.Size].Items.Add(result);
 
                 if (matrix.Size > 2) {
                     for (var i = 0; i < matrix.Size; i++) {
+                        token.ThrowIfCancellationRequested();
                         result.SubItems.Add(createCalcItem(matrix[i, 0], this.GetSign(i, 0), matrix.Reduce(i, 0)));
                     }
                 }
@@ -60,16 +62,23 @@ namespace Calculator {
                 return result;
             }
 
+            token.ThrowIfCancellationRequested();
             var rootItem = createCalcItem(1, 1, matrix);
 
+            token.ThrowIfCancellationRequested();
             var layersAscending = layersMap.OrderBy(x => x.Key).Select(x => x.Value);
 
-            foreach (var layer in layersAscending)
-            foreach (var calcItem in layer.Items) {
-                if (layer.Size == 2) {
-                    calcItem.Result = this.Calc(calcItem.Matrix);
-                } else {
-                    calcItem.Result = calcItem.SubItems.Sum(x => x.Item * x.Sign * x.Result);
+            foreach (var layer in layersAscending) {
+                token.ThrowIfCancellationRequested();
+
+                foreach (var calcItem in layer.Items) {
+                    token.ThrowIfCancellationRequested();
+
+                    if (layer.Size == 2) {
+                        calcItem.Result = this.Calc(calcItem.Matrix);
+                    } else {
+                        calcItem.Result = calcItem.SubItems.Sum(x => x.Item * x.Sign * x.Result);
+                    }
                 }
             }
 
