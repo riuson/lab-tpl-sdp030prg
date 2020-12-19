@@ -2,59 +2,60 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Calculator;
 
-namespace calculator
-{
-    public class DeterminantCalc
-    {
-        public int GetSign(int x, int y)
-        {
-            return ((x & 1) == 0 ? 1 : -1)
-                   *
-                   ((y & 1) == 0 ? 1 : -1);
-        }
+namespace Calculator {
+    public class DeterminantCalc {
+        public int GetSign(int x, int y) =>
+            ((x & 1) == 0 ? 1 : -1)
+            *
+            ((y & 1) == 0 ? 1 : -1);
 
-        public int Calc(SquareMatrix matrix)
-        {
-            if (matrix is null) throw new DeterminantCalcException();
+        public int Calc(SquareMatrix matrix) {
+            if (matrix is null) {
+                throw new DeterminantCalcException();
+            }
 
-            if (matrix.Size == 2) return matrix[0, 0] * matrix[1, 1] - matrix[0, 1] * matrix[1, 0];
+            if (matrix.Size == 2) {
+                return matrix[0, 0] * matrix[1, 1] - matrix[0, 1] * matrix[1, 0];
+            }
 
             var result = 0;
 
-            for (var x = 0; x < matrix.Size; x++)
-            {
+            for (var x = 0; x < matrix.Size; x++) {
                 var item = matrix[x, 0];
-                var sign = GetSign(x, 0);
+                var sign = this.GetSign(x, 0);
                 var subMatrix = matrix.Reduce(x, 0);
 
-                result += item * sign * Calc(subMatrix);
+                result += item * sign * this.Calc(subMatrix);
             }
 
             return result;
         }
 
-        public Task<int> CalcInTask(SquareMatrix matrix, CancellationToken token)
-        {
+        public Task<int> CalcInTask(SquareMatrix matrix, CancellationToken token) {
             token.ThrowIfCancellationRequested();
 
-            if (matrix is null) throw new DeterminantCalcException();
+            if (matrix is null) {
+                throw new DeterminantCalcException();
+            }
 
-            if (matrix.Size < 4) return Task.FromResult(Calc(matrix));
+            if (matrix.Size < 4) {
+                return Task.FromResult(this.Calc(matrix));
+            }
 
             var layersMap = Enumerable.Range(0, matrix.Size - 1)
                 .Select(x => new CalcLayer(x + 2))
                 .ToDictionary(x => x.Size);
 
-            CalcItem createCalcItem(int item, int sign, SquareMatrix matrix)
-            {
+            CalcItem createCalcItem(int item, int sign, SquareMatrix matrix) {
                 var result = new CalcItem(matrix.Size, item, sign, matrix);
                 layersMap[matrix.Size].Items.Add(result);
 
-                if (matrix.Size > 2)
-                    for (var i = 0; i < matrix.Size; i++)
-                        result.SubItems.Add(createCalcItem(matrix[i, 0], GetSign(i, 0), matrix.Reduce(i, 0)));
+                if (matrix.Size > 2) {
+                    for (var i = 0; i < matrix.Size; i++) {
+                        result.SubItems.Add(createCalcItem(matrix[i, 0], this.GetSign(i, 0), matrix.Reduce(i, 0)));
+                    }
+                }
 
                 return result;
             }
@@ -64,30 +65,30 @@ namespace calculator
             var layersAscending = layersMap.OrderBy(x => x.Key).Select(x => x.Value);
 
             foreach (var layer in layersAscending)
-            foreach (var calcItem in layer.Items)
-                if (layer.Size == 2)
-                    calcItem.Result = Calc(calcItem.Matrix);
-                else
+            foreach (var calcItem in layer.Items) {
+                if (layer.Size == 2) {
+                    calcItem.Result = this.Calc(calcItem.Matrix);
+                } else {
                     calcItem.Result = calcItem.SubItems.Sum(x => x.Item * x.Sign * x.Result);
+                }
+            }
 
             return Task.FromResult(rootItem.Result);
         }
 
-        public int[] Calc(SquareMatrix matrix1, params SquareMatrix[] matrices)
-        {
+        public int[] Calc(SquareMatrix matrix1, params SquareMatrix[] matrices) {
             var tasks = new List<Task<int>>();
 
-            Task<int> startCalc(SquareMatrix matrix)
-            {
+            Task<int> startCalc(SquareMatrix matrix) {
                 return Task<int>.Factory.StartNew(
-                    o => Calc((SquareMatrix) o),
+                    o => this.Calc((SquareMatrix) o),
                     matrix,
                     CancellationToken.None,
                     TaskCreationOptions.LongRunning,
                     TaskScheduler.Default);
             }
 
-            tasks.AddRange(new[] {matrix1}.Concat(matrices).Select(startCalc));
+            tasks.AddRange(new[] { matrix1 }.Concat(matrices).Select(startCalc));
 
             var resultTask = Task.Factory.ContinueWhenAll(
                 tasks.ToArray(),
@@ -96,12 +97,10 @@ namespace calculator
             return resultTask.Result;
         }
 
-        public Task<int[]> CalcAsync(CancellationToken token, params SquareMatrix[] matrices)
-        {
-            Task<int> startCalc(SquareMatrix matrix)
-            {
+        public Task<int[]> CalcAsync(CancellationToken token, params SquareMatrix[] matrices) {
+            Task<int> startCalc(SquareMatrix matrix) {
                 return Task<int>.Factory.StartNew(
-                    o => Calc((SquareMatrix) o),
+                    o => this.Calc((SquareMatrix) o),
                     matrix,
                     token);
             }
@@ -115,14 +114,12 @@ namespace calculator
             return resultTask;
         }
 
-        private class CalcItem
-        {
-            public CalcItem(int size, int item, int sign, SquareMatrix matrix)
-            {
-                Size = size;
-                Item = item;
-                Sign = sign;
-                Matrix = matrix;
+        private class CalcItem {
+            public CalcItem(int size, int item, int sign, SquareMatrix matrix) {
+                this.Size = size;
+                this.Item = item;
+                this.Sign = sign;
+                this.Matrix = matrix;
             }
 
             public int Size { get; }
@@ -135,20 +132,13 @@ namespace calculator
             public int Result { get; set; }
         }
 
-        private class CalcLayer
-        {
-            public CalcLayer(int size)
-            {
-                Size = size;
-            }
+        private class CalcLayer {
+            public CalcLayer(int size) => this.Size = size;
 
             public int Size { get; }
             public List<CalcItem> Items { get; } = new List<CalcItem>();
 
-            public override string ToString()
-            {
-                return $"Size: {Size}, Items Count: {Items.Count}";
-            }
+            public override string ToString() => $"Size: {this.Size}, Items Count: {this.Items.Count}";
         }
     }
 }

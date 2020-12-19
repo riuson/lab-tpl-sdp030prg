@@ -1,21 +1,17 @@
-﻿using System;
+﻿using NUnit.Framework;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Calculator;
-using NUnit.Framework;
 
-namespace calculator.tests
-{
-    internal class DeterminantCalcTests
-    {
+namespace Calculator.Tests {
+    internal class DeterminantCalcTests {
         private Random _random = new Random();
 
         [OneTimeSetUp]
-        public void OneTimeSetUp()
-        {
-            _random = new Random();
+        public void OneTimeSetUp() {
+            this._random = new Random();
         }
 
         [TestCase(0, 0, ExpectedResult = 1)]
@@ -34,8 +30,7 @@ namespace calculator.tests
         [TestCase(1, 3, ExpectedResult = 1)]
         [TestCase(2, 3, ExpectedResult = -1)]
         [TestCase(3, 3, ExpectedResult = 1)]
-        public int ShouldGetSign(int x, int y)
-        {
+        public int ShouldGetSign(int x, int y) {
             // Arrange.
             var calc = new DeterminantCalc();
 
@@ -44,8 +39,7 @@ namespace calculator.tests
         }
 
         [Test]
-        public void ShouldFailOnNull()
-        {
+        public void ShouldFailOnNull() {
             // Arrange.
             var calc = new DeterminantCalc();
 
@@ -54,13 +48,11 @@ namespace calculator.tests
         }
 
         [Test]
-        public void ShouldCalcDeterminantOfSize2()
-        {
+        public void ShouldCalcDeterminantOfSize2() {
             // Arrange.
-            int[,] array =
-            {
-                {11, -3},
-                {-15, -2}
+            int[,] array = {
+                { 11, -3 },
+                { -15, -2 }
             };
             var matrix = SquareMatrixFactory.Create(array);
             var calc = new DeterminantCalc();
@@ -74,14 +66,12 @@ namespace calculator.tests
         }
 
         [Test]
-        public void ShouldCalcDeterminantOfSize3()
-        {
+        public void ShouldCalcDeterminantOfSize3() {
             // Arrange.
-            int[,] array =
-            {
-                {1, -2, 3},
-                {4, 0, 6},
-                {-7, 8, 9}
+            int[,] array = {
+                { 1, -2, 3 },
+                { 4, 0, 6 },
+                { -7, 8, 9 }
             };
             var matrix = SquareMatrixFactory.Create(array);
             var calc = new DeterminantCalc();
@@ -95,14 +85,12 @@ namespace calculator.tests
         }
 
         [Test]
-        public void ShouldCalcDeterminantOfSize3InTask()
-        {
+        public void ShouldCalcDeterminantOfSize3InTask() {
             // Arrange.
-            int[,] array =
-            {
-                {1, -2, 3},
-                {4, 0, 6},
-                {-7, 8, 9}
+            int[,] array = {
+                { 1, -2, 3 },
+                { 4, 0, 6 },
+                { -7, 8, 9 }
             };
             var matrix = SquareMatrixFactory.Create(array);
             var calc = new DeterminantCalc();
@@ -118,15 +106,15 @@ namespace calculator.tests
         }
 
         [TestCase(8)]
-        public void ShouldCalcDeterminantInTask(int size)
-        {
+        public void ShouldCalcDeterminantInTask(int size) {
             // Arrange.
             var random = new Random();
             var matrix = SquareMatrixFactory.Create(size);
 
             for (var x = 0; x < size; x++)
-            for (var y = 0; y < size; y++)
+            for (var y = 0; y < size; y++) {
                 matrix[x, y] = random.Next(0, 10);
+            }
 
             var calc = new DeterminantCalc();
 
@@ -141,16 +129,16 @@ namespace calculator.tests
         [TestCase(5)]
         [TestCase(8)]
         [TestCase(9)]
-        public void CompareCalculationTime(int size)
-        {
+        public void CompareCalculationTime(int size) {
             // Arrange.
             var random = new Random();
             var matrix = SquareMatrixFactory.Create(size);
             var sw = new Stopwatch();
 
             for (var x = 0; x < size; x++)
-            for (var y = 0; y < size; y++)
+            for (var y = 0; y < size; y++) {
                 matrix[x, y] = random.Next(0, 10);
+            }
 
             var calc = new DeterminantCalc();
 
@@ -184,15 +172,15 @@ namespace calculator.tests
         //[TestCase(14)]
         //[TestCase(15)]
         //[TestCase(16)]
-        public void ShouldCalcDeterminantOfMoreSize(int size)
-        {
+        public void ShouldCalcDeterminantOfMoreSize(int size) {
             // Arrange.
             var random = new Random();
             var matrix = SquareMatrixFactory.Create(size);
 
             for (var x = 0; x < size; x++)
-            for (var y = 0; y < size; y++)
+            for (var y = 0; y < size; y++) {
                 matrix[x, y] = random.Next(0, 10);
+            }
 
             var calc = new DeterminantCalc();
 
@@ -203,26 +191,22 @@ namespace calculator.tests
         }
 
         [Test]
-        public void ShouldCalcMultiple()
-        {
+        public void ShouldCalcMultiple() {
             // Arrange.
-            int[,] array1 =
-            {
-                {11, -3},
-                {-15, -2}
+            int[,] array1 = {
+                { 11, -3 },
+                { -15, -2 }
             };
-            int[,] array2 =
-            {
-                {1, -2, 3},
-                {4, 0, 6},
-                {-7, 8, 9}
+            int[,] array2 = {
+                { 1, -2, 3 },
+                { 4, 0, 6 },
+                { -7, 8, 9 }
             };
 
             var matrix1 = SquareMatrixFactory.Create(array1);
             var matrix2 = SquareMatrixFactory.Create(array2);
             var calc = new DeterminantCalc();
-            var expected = new[]
-            {
+            var expected = new[] {
                 -67, 204
             };
 
@@ -234,26 +218,22 @@ namespace calculator.tests
         }
 
         [Test]
-        public void ShouldCalcMultipleTask()
-        {
+        public void ShouldCalcMultipleTask() {
             // Arrange.
-            int[,] array1 =
-            {
-                {11, -3},
-                {-15, -2}
+            int[,] array1 = {
+                { 11, -3 },
+                { -15, -2 }
             };
-            int[,] array2 =
-            {
-                {1, -2, 3},
-                {4, 0, 6},
-                {-7, 8, 9}
+            int[,] array2 = {
+                { 1, -2, 3 },
+                { 4, 0, 6 },
+                { -7, 8, 9 }
             };
 
             var matrix1 = SquareMatrixFactory.Create(array1);
             var matrix2 = SquareMatrixFactory.Create(array2);
             var calc = new DeterminantCalc();
-            var expected = new[]
-            {
+            var expected = new[] {
                 -67, 204
             };
 
@@ -267,11 +247,10 @@ namespace calculator.tests
         }
 
         [Test]
-        public void ShouldCalcMultipleTaskAndCancel()
-        {
+        public void ShouldCalcMultipleTaskAndCancel() {
             // Arrange.
             var matrices = Enumerable.Range(0, 1000)
-                .Select(_ => CreateRandomMatrix(8))
+                .Select(_ => this.CreateRandomMatrix(8))
                 .ToArray();
             var calc = new DeterminantCalc();
             var tokenSource = new CancellationTokenSource();
@@ -281,13 +260,10 @@ namespace calculator.tests
             sw.Start();
             var actualTask = calc.CalcAsync(tokenSource.Token, matrices);
             Thread.Sleep(100);
-            try
-            {
+            try {
                 tokenSource.Cancel();
                 actualTask.Wait();
-            }
-            catch (AggregateException ae)
-            {
+            } catch (AggregateException ae) {
                 Console.WriteLine(ae.Message);
             }
 
@@ -298,13 +274,13 @@ namespace calculator.tests
             Assert.That(actualTask.Status, Is.EqualTo(TaskStatus.Canceled));
         }
 
-        private SquareMatrix CreateRandomMatrix(int size)
-        {
+        private SquareMatrix CreateRandomMatrix(int size) {
             var matrix = SquareMatrixFactory.Create(size);
 
             for (var x = 0; x < size; x++)
-            for (var y = 0; y < size; y++)
-                matrix[x, y] = _random.Next(0, 10);
+            for (var y = 0; y < size; y++) {
+                matrix[x, y] = this._random.Next(0, 10);
+            }
 
             return matrix;
         }
