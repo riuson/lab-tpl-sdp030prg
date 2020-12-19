@@ -18,18 +18,18 @@ namespace Calculator.Laucher {
             var calc = new DeterminantCalc();
 
             sw.Start();
-            var task = calc.CalcInTask(matrix, CancellationToken.None);
+            var task = calc.CalcOneAsync(CancellationToken.None, matrix);
             task.Wait();
             sw.Stop();
             var timeOfTask = sw.Elapsed;
 
             sw.Restart();
-            calc.Calc(matrix);
+            calc.CalcOne(matrix);
             sw.Stop();
             var timePlain = sw.Elapsed;
 
-            Console.WriteLine($"Time in task: {timeOfTask}");
             Console.WriteLine($"Time plain:   {timePlain}");
+            Console.WriteLine($"Time async: {timeOfTask}");
         }
     }
 }

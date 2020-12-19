@@ -44,7 +44,24 @@ namespace Calculator.Tests {
             var calc = new DeterminantCalc();
 
             // Act & Assert.
-            Assert.Throws<DeterminantCalcException>(() => calc.Calc(null));
+            Assert.Throws<DeterminantCalcException>(() => calc.CalcOne(null));
+        }
+
+        [Test]
+        public void ShouldTaskFailOnNull() {
+            // Arrange.
+            var calc = new DeterminantCalc();
+            SquareMatrix matrix = null;
+
+            // Act.
+            var task = calc.CalcOneAsync(CancellationToken.None, matrix);
+
+            // Assert.
+            try {
+                task.Wait();
+            } catch (AggregateException ae) {
+                Assert.That(ae.InnerExceptions.Any(x => x is DeterminantCalcException), Is.True);
+            }
         }
 
         [Test]
@@ -59,7 +76,7 @@ namespace Calculator.Tests {
             var expected = -67;
 
             // Act.
-            var actual = calc.Calc(matrix);
+            var actual = calc.CalcOne(matrix);
 
             // Assert.
             Assert.That(actual, Is.EqualTo(expected));
@@ -78,14 +95,14 @@ namespace Calculator.Tests {
             var expected = 204;
 
             // Act.
-            var actual = calc.Calc(matrix);
+            var actual = calc.CalcOne(matrix);
 
             // Assert.
             Assert.That(actual, Is.EqualTo(expected));
         }
 
         [Test]
-        public void ShouldCalcDeterminantOfSize3InTask() {
+        public void ShouldCalcDeterminantOfSize3Async() {
             // Arrange.
             int[,] array = {
                 { 1, -2, 3 },
@@ -97,7 +114,7 @@ namespace Calculator.Tests {
             var expected = 204;
 
             // Act.
-            var task = calc.CalcInTask(matrix, CancellationToken.None);
+            var task = calc.CalcOneAsync(CancellationToken.None, matrix);
             task.Wait();
             var actual = task.Result;
 
@@ -106,7 +123,7 @@ namespace Calculator.Tests {
         }
 
         [TestCase(8)]
-        public void ShouldCalcDeterminantInTask(int size) {
+        public void ShouldCalcDeterminantAsync(int size) {
             // Arrange.
             var random = new Random();
             var matrix = SquareMatrixFactory.Create(size);
@@ -119,7 +136,7 @@ namespace Calculator.Tests {
             var calc = new DeterminantCalc();
 
             // Act.
-            var task = calc.CalcInTask(matrix, CancellationToken.None);
+            var task = calc.CalcOneAsync(CancellationToken.None, matrix);
             task.Wait();
 
             // Assert.
@@ -131,32 +148,27 @@ namespace Calculator.Tests {
         [TestCase(9)]
         public void CompareCalculationTime(int size) {
             // Arrange.
-            var random = new Random();
-            var matrix = SquareMatrixFactory.Create(size);
-            var sw = new Stopwatch();
-
-            for (var x = 0; x < size; x++)
-            for (var y = 0; y < size; y++) {
-                matrix[x, y] = random.Next(0, 10);
-            }
-
+            var matrices = Enumerable.Range(0, 10)
+                .Select(_ => this.CreateRandomMatrix(size))
+                .ToArray();
             var calc = new DeterminantCalc();
+            var sw = new Stopwatch();
 
             // Act.
             sw.Start();
-            var task = calc.CalcInTask(matrix, CancellationToken.None);
+            var task = calc.CalcManyAsync(CancellationToken.None, matrices);
             task.Wait();
             sw.Stop();
             var timeOfTask = sw.Elapsed;
 
             sw.Restart();
-            calc.Calc(matrix);
+            calc.CalcMany(matrices);
             sw.Stop();
             var timePlain = sw.Elapsed;
 
             // Assert.
-            Console.WriteLine($"Time in task: {timeOfTask}");
-            Console.WriteLine($"Time plain:   {timePlain}");
+            Console.WriteLine($"Time plain: {timePlain}");
+            Console.WriteLine($"Time async: {timeOfTask}");
         }
 
         [TestCase(4)]
@@ -185,7 +197,7 @@ namespace Calculator.Tests {
             var calc = new DeterminantCalc();
 
             // Act.
-            var actual = calc.Calc(matrix);
+            var actual = calc.CalcOne(matrix);
 
             // Assert.
         }
@@ -211,14 +223,14 @@ namespace Calculator.Tests {
             };
 
             // Act.
-            var actual = calc.Calc(matrix1, matrix2);
+            var actual = calc.CalcMany(matrix1, matrix2);
 
             // Assert.
             Assert.That(actual, Is.EqualTo(expected));
         }
 
         [Test]
-        public void ShouldCalcMultipleTask() {
+        public void ShouldCalcMultipleAsync() {
             // Arrange.
             int[,] array1 = {
                 { 11, -3 },
@@ -238,7 +250,7 @@ namespace Calculator.Tests {
             };
 
             // Act.
-            var actualTask = calc.CalcAsync(CancellationToken.None, matrix1, matrix2);
+            var actualTask = calc.CalcManyAsync(CancellationToken.None, matrix1, matrix2);
             actualTask.Wait();
             var actual = actualTask.Result;
 
@@ -247,7 +259,7 @@ namespace Calculator.Tests {
         }
 
         [Test]
-        public void ShouldCalcMultipleTaskAndCancel() {
+        public void ShouldCalcMultipleAsyncAndCancel() {
             // Arrange.
             var matrices = Enumerable.Range(0, 1000)
                 .Select(_ => this.CreateRandomMatrix(8))
@@ -258,7 +270,7 @@ namespace Calculator.Tests {
 
             // Act.
             sw.Start();
-            var actualTask = calc.CalcAsync(tokenSource.Token, matrices);
+            var actualTask = calc.CalcManyAsync(tokenSource.Token, matrices);
             Thread.Sleep(100);
             try {
                 tokenSource.Cancel();

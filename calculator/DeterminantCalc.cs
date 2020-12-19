@@ -123,6 +123,16 @@ namespace Calculator {
             return resultTask;
         }
 
+        public int CalcOne(SquareMatrix matrix) => throw new System.NotImplementedException();
+
+        public Task<int> CalcOneAsync(CancellationToken token, SquareMatrix matrix) =>
+            throw new System.NotImplementedException();
+
+        public int[] CalcMany(params SquareMatrix[] matrices) => throw new System.NotImplementedException();
+
+        public Task<int[]> CalcManyAsync(CancellationToken token, params SquareMatrix[] matrices) =>
+            throw new System.NotImplementedException();
+
         private class CalcItem {
             public CalcItem(int size, int item, int sign, SquareMatrix matrix) {
                 this.Size = size;
