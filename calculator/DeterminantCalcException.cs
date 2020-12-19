@@ -1,8 +1,5 @@
 ﻿using System;
 
-namespace calculator
-{
-    public class DeterminantCalcException : Exception
-    {
-    }
+namespace Calculator {
+    public class DeterminantCalcException : Exception { }
 }

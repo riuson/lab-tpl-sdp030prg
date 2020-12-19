@@ -1,12 +1,9 @@
 ﻿using NUnit.Framework;
 
-namespace Calculator.Tests
-{
-    internal class SquareMatrixTests
-    {
+namespace Calculator.Tests {
+    internal class SquareMatrixTests {
         [Test]
-        public void ShouldCreateMatrixWithSize()
-        {
+        public void ShouldCreateMatrixWithSize() {
             // Arrange.
             var size = 4;
 
@@ -18,14 +15,12 @@ namespace Calculator.Tests
         }
 
         [Test]
-        public void ShouldCreateMatrixFromArray()
-        {
+        public void ShouldCreateMatrixFromArray() {
             // Arrange.
-            int[,] array =
-            {
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
+            int[,] array = {
+                { 1, 2, 3 },
+                { 4, 5, 6 },
+                { 7, 8, 9 }
             };
             var expectedSize = 3;
 
@@ -37,8 +32,7 @@ namespace Calculator.Tests
         }
 
         [Test]
-        public void ShouldFailCreateMatrixFromArrayNull()
-        {
+        public void ShouldFailCreateMatrixFromArrayNull() {
             // Arrange.
             int[,] array = null;
 
@@ -47,15 +41,13 @@ namespace Calculator.Tests
         }
 
         [Test]
-        public void ShouldFailCreateMatrixFromTooSmallSize()
-        {
+        public void ShouldFailCreateMatrixFromTooSmallSize() {
             // Arrange & Act & Assert.
             Assert.Throws<SquareMatrixException>(() => SquareMatrixFactory.Create(1));
         }
 
         [Test]
-        public void ShouldFailCreateMatrixFromTooSmallArray()
-        {
+        public void ShouldFailCreateMatrixFromTooSmallArray() {
             // Arrange.
             var array = new int[1, 1];
 
@@ -64,8 +56,7 @@ namespace Calculator.Tests
         }
 
         [Test]
-        public void ShouldFailCreateMatrixFromArrayNotSquare()
-        {
+        public void ShouldFailCreateMatrixFromArrayNotSquare() {
             // Arrange.
             var array = new int[4, 6];
 
@@ -79,14 +70,12 @@ namespace Calculator.Tests
         [TestCase(100, 0)]
         [TestCase(0, 100)]
         [TestCase(100, 100)]
-        public void ShouldFailOnInvalidOffsetGet(int x, int y)
-        {
+        public void ShouldFailOnInvalidOffsetGet(int x, int y) {
             // Arrange.
             var matrix = SquareMatrixFactory.Create(3);
 
             // Act & Assert.
-            Assert.Throws<SquareMatrixException>(() =>
-            {
+            Assert.Throws<SquareMatrixException>(() => {
                 var b = matrix[x, y];
             });
         }
@@ -97,8 +86,7 @@ namespace Calculator.Tests
         [TestCase(100, 0)]
         [TestCase(0, 100)]
         [TestCase(100, 100)]
-        public void ShouldFailOnInvalidOffsetSet(int x, int y)
-        {
+        public void ShouldFailOnInvalidOffsetSet(int x, int y) {
             // Arrange.
             var matrix = SquareMatrixFactory.Create(3);
 
@@ -107,14 +95,12 @@ namespace Calculator.Tests
         }
 
         [Test]
-        public void ShouldGetItem()
-        {
+        public void ShouldGetItem() {
             // Arrange.
-            int[,] array =
-            {
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
+            int[,] array = {
+                { 1, 2, 3 },
+                { 4, 5, 6 },
+                { 7, 8, 9 }
             };
             var matrix = SquareMatrixFactory.Create(array);
 
@@ -131,14 +117,12 @@ namespace Calculator.Tests
         }
 
         [Test]
-        public void ShouldSetItem()
-        {
+        public void ShouldSetItem() {
             // Arrange.
-            int[,] array =
-            {
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
+            int[,] array = {
+                { 1, 2, 3 },
+                { 4, 5, 6 },
+                { 7, 8, 9 }
             };
             var matrix = SquareMatrixFactory.Create(array);
 
@@ -150,20 +134,17 @@ namespace Calculator.Tests
         }
 
         [Test]
-        public void ShouldCompareMatrixEquals()
-        {
+        public void ShouldCompareMatrixEquals() {
             // Arrange.
-            int[,] array1 =
-            {
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
+            int[,] array1 = {
+                { 1, 2, 3 },
+                { 4, 5, 6 },
+                { 7, 8, 9 }
             };
-            int[,] array2 =
-            {
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
+            int[,] array2 = {
+                { 1, 2, 3 },
+                { 4, 5, 6 },
+                { 7, 8, 9 }
             };
             var matrix1 = SquareMatrixFactory.Create(array1);
             var matrix2 = SquareMatrixFactory.Create(array2);
@@ -177,20 +158,17 @@ namespace Calculator.Tests
         }
 
         [Test]
-        public void ShouldCompareMatrixNotEquals1()
-        {
+        public void ShouldCompareMatrixNotEquals1() {
             // Arrange.
-            int[,] array1 =
-            {
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
+            int[,] array1 = {
+                { 1, 2, 3 },
+                { 4, 5, 6 },
+                { 7, 8, 9 }
             };
-            int[,] array2 =
-            {
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 0}
+            int[,] array2 = {
+                { 1, 2, 3 },
+                { 4, 5, 6 },
+                { 7, 8, 0 }
             };
             var matrix1 = SquareMatrixFactory.Create(array1);
             var matrix2 = SquareMatrixFactory.Create(array2);
@@ -204,19 +182,16 @@ namespace Calculator.Tests
         }
 
         [Test]
-        public void ShouldCompareMatrixNotEquals2()
-        {
+        public void ShouldCompareMatrixNotEquals2() {
             // Arrange.
-            int[,] array1 =
-            {
-                {1, 2},
-                {4, 5}
+            int[,] array1 = {
+                { 1, 2 },
+                { 4, 5 }
             };
-            int[,] array2 =
-            {
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
+            int[,] array2 = {
+                { 1, 2, 3 },
+                { 4, 5, 6 },
+                { 7, 8, 9 }
             };
             var matrix1 = SquareMatrixFactory.Create(array1);
             var matrix2 = SquareMatrixFactory.Create(array2);
@@ -230,14 +205,12 @@ namespace Calculator.Tests
         }
 
         [Test]
-        public void ShouldCompareMatrixNotEquals3()
-        {
+        public void ShouldCompareMatrixNotEquals3() {
             // Arrange.
-            int[,] array2 =
-            {
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
+            int[,] array2 = {
+                { 1, 2, 3 },
+                { 4, 5, 6 },
+                { 7, 8, 9 }
             };
             SquareMatrix matrix1 = null;
             var matrix2 = SquareMatrixFactory.Create(array2);
@@ -251,19 +224,16 @@ namespace Calculator.Tests
         }
 
         [Test]
-        public void ShouldReduceMatrix1()
-        {
+        public void ShouldReduceMatrix1() {
             // Arrange.
-            int[,] array =
-            {
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
+            int[,] array = {
+                { 1, 2, 3 },
+                { 4, 5, 6 },
+                { 7, 8, 9 }
             };
-            int[,] arrayReduced =
-            {
-                {1, 3},
-                {7, 9}
+            int[,] arrayReduced = {
+                { 1, 3 },
+                { 7, 9 }
             };
             var matrix = SquareMatrixFactory.Create(array);
             var matrixExpected = SquareMatrixFactory.Create(arrayReduced);
@@ -276,19 +246,16 @@ namespace Calculator.Tests
         }
 
         [Test]
-        public void ShouldReduceMatrix2()
-        {
+        public void ShouldReduceMatrix2() {
             // Arrange.
-            int[,] array =
-            {
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
+            int[,] array = {
+                { 1, 2, 3 },
+                { 4, 5, 6 },
+                { 7, 8, 9 }
             };
-            int[,] arrayReduced =
-            {
-                {5, 6},
-                {8, 9}
+            int[,] arrayReduced = {
+                { 5, 6 },
+                { 8, 9 }
             };
             var matrix = SquareMatrixFactory.Create(array);
             var matrixExpected = SquareMatrixFactory.Create(arrayReduced);
@@ -301,19 +268,16 @@ namespace Calculator.Tests
         }
 
         [Test]
-        public void ShouldReduceMatrix3()
-        {
+        public void ShouldReduceMatrix3() {
             // Arrange.
-            int[,] array =
-            {
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
+            int[,] array = {
+                { 1, 2, 3 },
+                { 4, 5, 6 },
+                { 7, 8, 9 }
             };
-            int[,] arrayReduced =
-            {
-                {4, 6},
-                {7, 9}
+            int[,] arrayReduced = {
+                { 4, 6 },
+                { 7, 9 }
             };
             var matrix = SquareMatrixFactory.Create(array);
             var matrixExpected = SquareMatrixFactory.Create(arrayReduced);
@@ -326,19 +290,16 @@ namespace Calculator.Tests
         }
 
         [Test]
-        public void ShouldReduceMatrix4()
-        {
+        public void ShouldReduceMatrix4() {
             // Arrange.
-            int[,] array =
-            {
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
+            int[,] array = {
+                { 1, 2, 3 },
+                { 4, 5, 6 },
+                { 7, 8, 9 }
             };
-            int[,] arrayReduced =
-            {
-                {4, 5},
-                {7, 8}
+            int[,] arrayReduced = {
+                { 4, 5 },
+                { 7, 8 }
             };
             var matrix = SquareMatrixFactory.Create(array);
             var matrixExpected = SquareMatrixFactory.Create(arrayReduced);
