@@ -1,4 +1,7 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Calculator;
 
 namespace calculator
@@ -34,7 +37,44 @@ namespace calculator
 
         public int[] Calc(SquareMatrix matrix1, params SquareMatrix[] matrices)
         {
-            throw new NotImplementedException();
+            var tasks = new List<Task<int>>();
+
+            Task<int> startCalc(SquareMatrix matrix)
+            {
+                return Task<int>.Factory.StartNew(
+                    o => Calc((SquareMatrix) o),
+                    matrix,
+                    CancellationToken.None,
+                    TaskCreationOptions.LongRunning,
+                    TaskScheduler.Default);
+            }
+
+            tasks.AddRange(new[] {matrix1}.Concat(matrices).Select(startCalc));
+
+            var resultTask = Task.Factory.ContinueWhenAll(
+                tasks.ToArray(),
+                ts => { return ts.Select(x => x.Result).ToArray(); });
+            resultTask.Wait();
+            return resultTask.Result;
+        }
+
+        public Task<int[]> CalcAsync(CancellationToken token, params SquareMatrix[] matrices)
+        {
+            Task<int> startCalc(SquareMatrix matrix)
+            {
+                return Task<int>.Factory.StartNew(
+                    o => Calc((SquareMatrix) o),
+                    matrix,
+                    token);
+            }
+
+            var tasks = matrices.Select(startCalc).ToArray();
+
+            var resultTask = Task.Factory.ContinueWhenAll(
+                tasks.ToArray(),
+                ts => { return ts.Select(x => x.Result).ToArray(); },
+                token);
+            return resultTask;
         }
     }
 }

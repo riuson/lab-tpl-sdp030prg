@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Calculator;
 using NUnit.Framework;
 
@@ -192,7 +193,7 @@ namespace calculator.tests
         public void ShouldCalcMultipleTaskAndCancel()
         {
             // Arrange.
-            var matrices = Enumerable.Range(0, 20)
+            var matrices = Enumerable.Range(0, 1000)
                 .Select(_ => CreateRandomMatrix(8))
                 .ToArray();
             var calc = new DeterminantCalc();
@@ -202,14 +203,22 @@ namespace calculator.tests
             // Act.
             sw.Start();
             var actualTask = calc.CalcAsync(tokenSource.Token, matrices);
-            Thread.Sleep(1000);
-            tokenSource.Cancel();
-            actualTask.Wait();
+            Thread.Sleep(100);
+            try
+            {
+                tokenSource.Cancel();
+                actualTask.Wait();
+            }
+            catch (AggregateException ae)
+            {
+                Console.WriteLine(ae.Message);
+            }
+
             sw.Stop();
-            var actual = actualTask.Result;
 
             // Assert.
-            Assert.That(sw.Elapsed, Is.LessThan(TimeSpan.FromSeconds(2)));
+            Assert.That(sw.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
+            Assert.That(actualTask.Status, Is.EqualTo(TaskStatus.Canceled));
         }
 
         private SquareMatrix CreateRandomMatrix(int size)
