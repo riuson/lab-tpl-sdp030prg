@@ -37,17 +37,17 @@ namespace Calculator {
                     token);
             }
 
-            Task<long> startCalcThread(SquareMatrix matrix) {
-                return Task<long>.Factory.StartNew(
-                    o => {
-                        //Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
-                        return this.CalcPrivate(token, (SquareMatrix) o);
-                    },
-                    matrix,
-                    token,
-                    TaskCreationOptions.LongRunning,
-                    TaskScheduler.Default);
-            }
+            //Task<long> startCalcThread(SquareMatrix matrix) {
+            //    return Task<long>.Factory.StartNew(
+            //        o => {
+            //            //Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
+            //            return this.CalcPrivate(token, (SquareMatrix) o);
+            //        },
+            //        matrix,
+            //        token,
+            //        TaskCreationOptions.LongRunning,
+            //        TaskScheduler.Default);
+            //}
 
             tasks.AddRange(matrices.Select(startCalcTask));
 
