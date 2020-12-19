@@ -55,6 +55,15 @@ namespace Calculator {
                 tasks.ToArray(),
                 ts => { return ts.Select(x => x.Result).ToArray(); },
                 token);
+
+
+            //var resultTask = new Task<long[]>(() => {
+            //    return matrices.AsParallel()
+            //        .Select(x => this.CalcPrivate(token, x))
+            //        .ToArray();
+            //}, token);
+            //resultTask.Start();
+
             return resultTask;
         }
 
