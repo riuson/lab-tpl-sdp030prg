@@ -65,27 +65,38 @@ namespace Calculator {
                 throw new DeterminantCalcException();
             }
 
+            if (matrix.Size == 2) {
+                return matrix[0, 0] * matrix[1, 1]
+                       -
+                       matrix[0, 1] * matrix[1, 0];
+            }
+
             var layersMap = Enumerable.Range(0, matrix.Size - 1)
                 .Select(x => new CalcLayer(x + 2))
                 .ToDictionary(x => x.Size);
 
-            CalcItem createCalcItem(long item, int sign, SquareMatrix matrix) {
-                token.ThrowIfCancellationRequested();
-                var result = new CalcItem(matrix.Size, item, sign, matrix);
-                layersMap[matrix.Size].Items.Add(result);
+            var currentSize = matrix.Size;
+            var rootItem = new CalcItem(currentSize, 1, 1, matrix);
+            layersMap[matrix.Size].Items.Add(rootItem);
 
-                if (matrix.Size > 2) {
-                    for (var i = 0; i < matrix.Size; i++) {
-                        token.ThrowIfCancellationRequested();
-                        result.SubItems.Add(createCalcItem(matrix[i, 0], this.GetSign(i, 0), matrix.Reduce(i, 0)));
+            do {
+                var currentLayer = layersMap[currentSize];
+                var nextLayer = layersMap[currentSize - 1];
+
+                foreach (var calcItem in currentLayer.Items) {
+                    for (var i = 0; i < currentSize; i++) {
+                        var subCalcItem = new CalcItem(
+                            calcItem.Size - 1,
+                            calcItem.Matrix[i, 0],
+                            this.GetSign(i, 0),
+                            calcItem.Matrix.Reduce(i, 0));
+                        calcItem.SubItems.Add(subCalcItem);
+                        nextLayer.Items.Add(subCalcItem);
                     }
                 }
 
-                return result;
-            }
-
-            token.ThrowIfCancellationRequested();
-            var rootItem = createCalcItem(1, 1, matrix);
+                currentSize--;
+            } while (currentSize > 2);
 
             token.ThrowIfCancellationRequested();
             var layersAscending = layersMap.OrderBy(x => x.Key).Select(x => x.Value);
