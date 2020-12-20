@@ -1,5 +1,4 @@
 ﻿using Fractions;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -76,11 +75,7 @@ namespace Calculator {
 
             token.ThrowIfCancellationRequested();
 
-            try {
-                this.MakeTriangle(token, triangleArray, ref invert);
-            } catch (DivideByZeroException) {
-                throw new DivideByZeroException();
-            }
+            this.MakeTriangle(token, triangleArray, ref invert);
 
             token.ThrowIfCancellationRequested();
 
@@ -120,7 +115,7 @@ namespace Calculator {
             for (var y = xy + 1; y < triangleArray.GetLength(0); y++) {
                 if (triangleArray[xy, xy] == 0) {
                     if (!this.TryGetRowNonZero(triangleArray, xy, xy, out var validRow)) {
-                        throw new DivideByZeroException();
+                        return;
                     }
 
                     this.SwapRows(triangleArray, xy, validRow);
