@@ -1,12 +1,30 @@
 ﻿namespace Calculator {
-    public abstract class SquareMatrix {
-        internal SquareMatrix(int size) => this.Size = size;
+    public class SquareMatrix {
+        private readonly int[,] _array;
 
-        public abstract int this[int x, int y] { get; set; }
+        public SquareMatrix(int size) {
+            if (size < 2) {
+                throw new SquareMatrixException();
+            }
+
+            this.Size = size;
+            this._array = new int[size, size];
+        }
+
+        public int this[int x, int y] {
+            get {
+                this.ThrowOnInvalidOffset(x);
+                this.ThrowOnInvalidOffset(y);
+                return this._array[x, y];
+            }
+            set {
+                this.ThrowOnInvalidOffset(x);
+                this.ThrowOnInvalidOffset(y);
+                this._array[x, y] = value;
+            }
+        }
 
         public int Size { get; }
-
-        public abstract SquareMatrix Reduce(int removeX, int removeY);
 
         public override bool Equals(object? obj) {
             if (!(obj is SquareMatrix sqmb)) {
@@ -44,5 +62,11 @@
         public static bool operator !=(SquareMatrix matrix1, SquareMatrix matrix2) => !(matrix1 == matrix2);
 
         public override string ToString() => $"{this.Size} x {this.Size}";
+
+        private void ThrowOnInvalidOffset(int offset) {
+            if (offset < 0 || offset >= this.Size) {
+                throw new SquareMatrixException();
+            }
+        }
     }
 }

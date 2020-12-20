@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Fractions;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,44 +13,29 @@ namespace Calculator {
             *
             ((y & 1) == 0 ? 1 : -1);
 
-        public long CalcOne(SquareMatrix matrix) => this.CalcPrivate(CancellationToken.None, matrix);
+        public BigInteger CalcOne(SquareMatrix matrix) => this.CalcPrivate(CancellationToken.None, matrix);
 
-        public Task<long> CalcOneAsync(CancellationToken token, SquareMatrix matrix) =>
-            Task<long>.Factory.StartNew(
+        public Task<BigInteger> CalcOneAsync(CancellationToken token, SquareMatrix matrix) =>
+            Task<BigInteger>.Factory.StartNew(
                 o => this.CalcPrivate(token, (SquareMatrix) o),
                 matrix,
                 token);
 
 
-        public long[] CalcMany(params SquareMatrix[] matrices) =>
+        public BigInteger[] CalcMany(params SquareMatrix[] matrices) =>
             matrices
                 .Select(x => this.CalcPrivate(CancellationToken.None, x))
                 .ToArray();
 
-        public Task<long[]> CalcManyAsync(CancellationToken token, params SquareMatrix[] matrices) {
-            var tasks = new List<Task<long>>();
+        public Task<BigInteger[]> CalcManyAsync(CancellationToken token, params SquareMatrix[] matrices) {
+            var tasks = new List<Task<BigInteger>>();
 
-            Task<long> startCalcTask(SquareMatrix matrix) {
-                return Task<long>.Factory.StartNew(
-                    o => {
-                        //Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
-                        return this.CalcPrivate(token, (SquareMatrix) o);
-                    },
+            Task<BigInteger> startCalcTask(SquareMatrix matrix) {
+                return Task<BigInteger>.Factory.StartNew(
+                    o => { return this.CalcPrivate(token, (SquareMatrix) o); },
                     matrix,
                     token);
             }
-
-            //Task<long> startCalcThread(SquareMatrix matrix) {
-            //    return Task<long>.Factory.StartNew(
-            //        o => {
-            //            //Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
-            //            return this.CalcPrivate(token, (SquareMatrix) o);
-            //        },
-            //        matrix,
-            //        token,
-            //        TaskCreationOptions.LongRunning,
-            //        TaskScheduler.Default);
-            //}
 
             tasks.AddRange(matrices.Select(startCalcTask));
 
@@ -57,7 +45,7 @@ namespace Calculator {
                 token);
 
 
-            //var resultTask = new Task<long[]>(() => {
+            //var resultTask = new Task<BigInteger[]>(() => {
             //    return matrices.AsParallel()
             //        .Select(x => this.CalcPrivate(token, x))
             //        .ToArray();
@@ -67,7 +55,7 @@ namespace Calculator {
             return resultTask;
         }
 
-        private long CalcPrivate(CancellationToken token, SquareMatrix matrix) {
+        private BigInteger CalcPrivate(CancellationToken token, SquareMatrix matrix) {
             token.ThrowIfCancellationRequested();
 
             if (matrix is null) {
@@ -78,98 +66,105 @@ namespace Calculator {
                 return this.CalcMatrixOfSize2(matrix);
             }
 
-            var layersMap = Enumerable.Range(0, matrix.Size - 1)
-                .Select(x => new CalcLayer(x + 2))
-                .ToDictionary(x => x.Size);
+            var triangleArray = this.MatrixToFractionalArray(matrix);
 
-            var rootItem = this.CreateTree(matrix, layersMap, token);
+            if (!this.TryGetRowNonZero(triangleArray, 0, 0, out var rowNonZero)) {
+                return 0;
+            }
 
-            this.CalcTree(layersMap, token);
+            var invert = false;
 
-            return rootItem.Result;
+            token.ThrowIfCancellationRequested();
+
+            try {
+                this.MakeTriangle(token, triangleArray, ref invert);
+            } catch (DivideByZeroException) {
+                throw new DivideByZeroException();
+            }
+
+            token.ThrowIfCancellationRequested();
+
+            var result = this.GetDeterminant(triangleArray);
+            token.ThrowIfCancellationRequested();
+
+            return result.ToBigInteger() * (invert ? -1 : 1);
         }
 
-        private CalcItem CreateTree(
-            SquareMatrix matrix,
-            Dictionary<int, CalcLayer> layersMap,
-            CancellationToken token) {
-            var currentSize = matrix.Size;
-            var rootItem = new CalcItem(currentSize, 1, 1, matrix);
-            layersMap[matrix.Size].Items.Add(rootItem);
+        private Fraction[,] MatrixToFractionalArray(SquareMatrix matrix) {
+            var result = new Fraction[matrix.Size, matrix.Size];
 
-            do {
-                var currentLayer = layersMap[currentSize];
-                var nextLayer = layersMap[currentSize - 1];
+            for (var x = 0; x < matrix.Size; x++) {
+                for (var y = 0; y < matrix.Size; y++) {
+                    result[x, y] = matrix[x, y];
+                }
+            }
 
-                foreach (var calcItem in currentLayer.Items) {
-                    for (var i = 0; i < currentSize; i++) {
-                        token.ThrowIfCancellationRequested();
-                        var subCalcItem = new CalcItem(
-                            calcItem.Size - 1,
-                            calcItem.Matrix[i, 0],
-                            this.GetSign(i, 0),
-                            calcItem.Matrix.Reduce(i, 0));
-                        calcItem.SubItems.Add(subCalcItem);
-                        nextLayer.Items.Add(subCalcItem);
+            return result;
+        }
+
+        private void MakeTriangle(CancellationToken token, Fraction[,] triangleArray, ref bool invert) {
+            this.TryGetRowNonZero(triangleArray, 0, 0, out var rowNonZero);
+
+            if (rowNonZero != 0) {
+                this.SwapRows(triangleArray, 0, rowNonZero);
+                invert = !invert;
+            }
+
+            for (var xy = 0; xy < triangleArray.GetLength(0); xy++) {
+                token.ThrowIfCancellationRequested();
+                this.MakeZeroes(triangleArray, xy, ref invert);
+            }
+        }
+
+        private void MakeZeroes(Fraction[,] triangleArray, int xy, ref bool invert) {
+            for (var y = xy + 1; y < triangleArray.GetLength(0); y++) {
+                if (triangleArray[xy, xy] == 0) {
+                    if (!this.TryGetRowNonZero(triangleArray, xy, xy, out var validRow)) {
+                        throw new DivideByZeroException();
                     }
+
+                    this.SwapRows(triangleArray, xy, validRow);
+                    invert = !invert;
                 }
 
-                currentSize--;
-            } while (currentSize > 2);
+                var coefficient = triangleArray[xy, y] / triangleArray[xy, xy];
 
-            return rootItem;
-        }
-
-        private void CalcTree(
-            Dictionary<int, CalcLayer> layersMap,
-            CancellationToken token) {
-            token.ThrowIfCancellationRequested();
-            var layersAscending = layersMap.OrderBy(x => x.Key).Select(x => x.Value);
-
-            foreach (var layer in layersAscending) {
-                token.ThrowIfCancellationRequested();
-
-                foreach (var calcItem in layer.Items) {
-                    token.ThrowIfCancellationRequested();
-
-                    if (layer.Size == 2) {
-                        calcItem.Result = this.CalcMatrixOfSize2(calcItem.Matrix);
-                    } else {
-                        calcItem.Result = calcItem.SubItems.Sum(x => x.Item * x.Sign * x.Result);
-                    }
+                for (var x = xy; x < triangleArray.GetLength(0); x++) {
+                    triangleArray[x, y] = triangleArray[x, y] - triangleArray[x, xy] * coefficient;
                 }
             }
         }
 
-        private int CalcMatrixOfSize2(SquareMatrix matrix) =>
+        private void SwapRows(Fraction[,] triangleArray, int from, int to) {
+            for (var i = 0; i < triangleArray.GetLength(0); i++) {
+                var item = triangleArray[i, from];
+                triangleArray[i, from] = triangleArray[i, to];
+                triangleArray[i, to] = item;
+            }
+        }
+
+        private bool TryGetRowNonZero(Fraction[,] triangleArray, int x, int y, out int resultY) {
+            for (resultY = y; resultY < triangleArray.GetLength(0); resultY++) {
+                if (triangleArray[x, resultY] != 0) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private Fraction GetDeterminant(Fraction[,] triangleArray) {
+            Fraction result = 1;
+
+            for (var i = 0; i < triangleArray.GetLength(0); i++) {
+                result *= triangleArray[i, i];
+            }
+
+            return result;
+        }
+
+        private BigInteger CalcMatrixOfSize2(SquareMatrix matrix) =>
             matrix[0, 0] * matrix[1, 1] -
             matrix[0, 1] * matrix[1, 0];
-
-        private class CalcItem {
-            public CalcItem(int size, long item, int sign, SquareMatrix matrix) {
-                this.Size = size;
-                this.Item = item;
-                this.Sign = sign;
-                this.Matrix = matrix;
-            }
-
-            public int Size { get; }
-            public long Item { get; }
-            public int Sign { get; }
-            public SquareMatrix Matrix { get; }
-
-            public List<CalcItem> SubItems { get; } = new List<CalcItem>();
-
-            public long Result { get; set; }
-        }
-
-        private class CalcLayer {
-            public CalcLayer(int size) => this.Size = size;
-
-            public int Size { get; }
-            public List<CalcItem> Items { get; } = new List<CalcItem>();
-
-            public override string ToString() => $"Size: {this.Size}, Items Count: {this.Items.Count}";
-        }
     }
 }

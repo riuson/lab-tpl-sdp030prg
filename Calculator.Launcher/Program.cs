@@ -8,10 +8,10 @@ namespace Calculator.Laucher {
         private static readonly Random _random = new Random();
 
         private static void Main(string[] args) {
-            var size = 10;
+            var size = 30;
             var sw = new Stopwatch();
 
-            var matrices = Enumerable.Range(0, 20)
+            var matrices = Enumerable.Range(0, 5000)
                 .Select(_ => CreateRandomMatrix(size))
                 .ToArray();
 
@@ -26,6 +26,8 @@ namespace Calculator.Laucher {
             var timeOfTask = sw.Elapsed;
 
             Console.WriteLine($"Time async: {timeOfTask}");
+
+            Thread.Sleep(10000);
 
             Console.WriteLine("Starting plain calculation...");
 

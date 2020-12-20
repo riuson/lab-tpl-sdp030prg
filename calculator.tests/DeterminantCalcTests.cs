@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -73,7 +74,7 @@ namespace Calculator.Tests {
             };
             var matrix = SquareMatrixFactory.Create(array);
             var calc = new DeterminantCalc();
-            var expected = -67;
+            BigInteger expected = -67;
 
             // Act.
             var actual = calc.CalcOne(matrix);
@@ -92,7 +93,7 @@ namespace Calculator.Tests {
             };
             var matrix = SquareMatrixFactory.Create(array);
             var calc = new DeterminantCalc();
-            var expected = 204;
+            BigInteger expected = 204;
 
             // Act.
             var actual = calc.CalcOne(matrix);
@@ -111,12 +112,54 @@ namespace Calculator.Tests {
             };
             var matrix = SquareMatrixFactory.Create(array);
             var calc = new DeterminantCalc();
-            var expected = 204;
+            BigInteger expected = 204;
 
             // Act.
             var task = calc.CalcOneAsync(CancellationToken.None, matrix);
             task.Wait();
             var actual = task.Result;
+
+            // Assert.
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void ShouldCalcDeterminantOfSize4() {
+            // Arrange.
+            int[,] array = {
+                { 0, 0, 4, 2 },
+                { 1, 2, 9, 2 },
+                { 7, 2, 8, 5 },
+                { 6, 1, 4, 9 }
+            };
+            var matrix = SquareMatrixFactory.Create(array);
+            var calc = new DeterminantCalc();
+            BigInteger expected = -242;
+
+            // Act.
+            var actual = calc.CalcOne(matrix);
+
+            // Assert.
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void ShouldCalcDeterminantOfSize6() {
+            // Arrange.
+            int[,] array = {
+                { 1, 5, 5, 6, 1, 6 },
+                { 51, 51, 5, 5, 45, 45 },
+                { 50, 54, 54, 54, 5, 45 },
+                { 4, 54, 4, 5, 4, 4 },
+                { 84, 84, 48, 64, 54, 4 },
+                { 45, 45, 0, 54, 54, 54 }
+            };
+            var matrix = SquareMatrixFactory.Create(array);
+            var calc = new DeterminantCalc();
+            BigInteger expected = -2088572580;
+
+            // Act.
+            var actual = calc.CalcOne(matrix);
 
             // Assert.
             Assert.That(actual, Is.EqualTo(expected));
@@ -152,6 +195,7 @@ namespace Calculator.Tests {
         [TestCase(9, 80)]
         [TestCase(10, 10)]
         [TestCase(6, 800)]
+        [TestCase(20, 800)]
         public void CompareCalculationTime(int size, int count) {
             // Arrange.
             var matrices = Enumerable.Range(0, count)
@@ -224,7 +268,7 @@ namespace Calculator.Tests {
             var matrix1 = SquareMatrixFactory.Create(array1);
             var matrix2 = SquareMatrixFactory.Create(array2);
             var calc = new DeterminantCalc();
-            var expected = new[] {
+            var expected = new BigInteger[] {
                 -67, 204
             };
 
@@ -251,7 +295,7 @@ namespace Calculator.Tests {
             var matrix1 = SquareMatrixFactory.Create(array1);
             var matrix2 = SquareMatrixFactory.Create(array2);
             var calc = new DeterminantCalc();
-            var expected = new[] {
+            var expected = new BigInteger[] {
                 -67, 204
             };
 
@@ -277,7 +321,7 @@ namespace Calculator.Tests {
             // Act.
             sw.Start();
             var actualTask = calc.CalcManyAsync(tokenSource.Token, matrices);
-            Thread.Sleep(100);
+
             try {
                 tokenSource.Cancel();
                 actualTask.Wait();
