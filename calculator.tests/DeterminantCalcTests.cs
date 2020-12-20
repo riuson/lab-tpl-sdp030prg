@@ -143,6 +143,28 @@ namespace Calculator.Tests {
             Assert.That(actual, Is.EqualTo(expected));
         }
 
+        [Test]
+        public void ShouldCalcDeterminantOfSize6() {
+            // Arrange.
+            int[,] array = {
+                { 1, 5, 5, 6, 1, 6 },
+                { 51, 51, 5, 5, 45, 45 },
+                { 50, 54, 54, 54, 5, 45 },
+                { 4, 54, 4, 5, 4, 4 },
+                { 84, 84, 48, 64, 54, 4 },
+                { 45, 45, 0, 54, 54, 54 }
+            };
+            var matrix = SquareMatrixFactory.Create(array);
+            var calc = new DeterminantCalc();
+            BigInteger expected = -2088572580;
+
+            // Act.
+            var actual = calc.CalcOne(matrix);
+
+            // Assert.
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
         [TestCase(8)]
         public void ShouldCalcDeterminantAsync(int size) {
             // Arrange.
