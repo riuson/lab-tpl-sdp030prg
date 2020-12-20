@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,25 +13,25 @@ namespace Calculator {
             *
             ((y & 1) == 0 ? 1 : -1);
 
-        public long CalcOne(SquareMatrix matrix) => this.CalcPrivate(CancellationToken.None, matrix);
+        public BigInteger CalcOne(SquareMatrix matrix) => this.CalcPrivate(CancellationToken.None, matrix);
 
-        public Task<long> CalcOneAsync(CancellationToken token, SquareMatrix matrix) =>
-            Task<long>.Factory.StartNew(
+        public Task<BigInteger> CalcOneAsync(CancellationToken token, SquareMatrix matrix) =>
+            Task<BigInteger>.Factory.StartNew(
                 o => this.CalcPrivate(token, (SquareMatrix) o),
                 matrix,
                 token);
 
 
-        public long[] CalcMany(params SquareMatrix[] matrices) =>
+        public BigInteger[] CalcMany(params SquareMatrix[] matrices) =>
             matrices
                 .Select(x => this.CalcPrivate(CancellationToken.None, x))
                 .ToArray();
 
-        public Task<long[]> CalcManyAsync(CancellationToken token, params SquareMatrix[] matrices) {
-            var tasks = new List<Task<long>>();
+        public Task<BigInteger[]> CalcManyAsync(CancellationToken token, params SquareMatrix[] matrices) {
+            var tasks = new List<Task<BigInteger>>();
 
-            Task<long> startCalcTask(SquareMatrix matrix) {
-                return Task<long>.Factory.StartNew(
+            Task<BigInteger> startCalcTask(SquareMatrix matrix) {
+                return Task<BigInteger>.Factory.StartNew(
                     o => { return this.CalcPrivate(token, (SquareMatrix) o); },
                     matrix,
                     token);
@@ -44,7 +45,7 @@ namespace Calculator {
                 token);
 
 
-            //var resultTask = new Task<long[]>(() => {
+            //var resultTask = new Task<BigInteger[]>(() => {
             //    return matrices.AsParallel()
             //        .Select(x => this.CalcPrivate(token, x))
             //        .ToArray();
@@ -54,7 +55,7 @@ namespace Calculator {
             return resultTask;
         }
 
-        private long CalcPrivate(CancellationToken token, SquareMatrix matrix) {
+        private BigInteger CalcPrivate(CancellationToken token, SquareMatrix matrix) {
             token.ThrowIfCancellationRequested();
 
             if (matrix is null) {
@@ -88,7 +89,7 @@ namespace Calculator {
             var result = this.GetDeterminant(triangleArray);
             token.ThrowIfCancellationRequested();
 
-            return result.ToInt64() * (invert ? -1 : 1);
+            return result.ToBigInteger() * (invert ? -1 : 1);
         }
 
         private Fraction[,] MatrixToFractionalArray(SquareMatrix matrix) {
@@ -171,7 +172,7 @@ namespace Calculator {
             return result;
         }
 
-        private long CalcMatrixOfSize2(SquareMatrix matrix) =>
+        private BigInteger CalcMatrixOfSize2(SquareMatrix matrix) =>
             matrix[0, 0] * matrix[1, 1] -
             matrix[0, 1] * matrix[1, 0];
 

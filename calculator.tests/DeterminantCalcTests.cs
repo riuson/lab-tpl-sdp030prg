@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -73,7 +74,7 @@ namespace Calculator.Tests {
             };
             var matrix = SquareMatrixFactory.Create(array);
             var calc = new DeterminantCalc();
-            var expected = -67;
+            BigInteger expected = -67;
 
             // Act.
             var actual = calc.CalcOne(matrix);
@@ -92,7 +93,7 @@ namespace Calculator.Tests {
             };
             var matrix = SquareMatrixFactory.Create(array);
             var calc = new DeterminantCalc();
-            var expected = 204;
+            BigInteger expected = 204;
 
             // Act.
             var actual = calc.CalcOne(matrix);
@@ -111,7 +112,7 @@ namespace Calculator.Tests {
             };
             var matrix = SquareMatrixFactory.Create(array);
             var calc = new DeterminantCalc();
-            var expected = 204;
+            BigInteger expected = 204;
 
             // Act.
             var task = calc.CalcOneAsync(CancellationToken.None, matrix);
@@ -133,7 +134,7 @@ namespace Calculator.Tests {
             };
             var matrix = SquareMatrixFactory.Create(array);
             var calc = new DeterminantCalc();
-            var expected = -242;
+            BigInteger expected = -242;
 
             // Act.
             var actual = calc.CalcOne(matrix);
@@ -172,6 +173,7 @@ namespace Calculator.Tests {
         [TestCase(9, 80)]
         [TestCase(10, 10)]
         [TestCase(6, 800)]
+        [TestCase(20, 800)]
         public void CompareCalculationTime(int size, int count) {
             // Arrange.
             var matrices = Enumerable.Range(0, count)
@@ -244,7 +246,7 @@ namespace Calculator.Tests {
             var matrix1 = SquareMatrixFactory.Create(array1);
             var matrix2 = SquareMatrixFactory.Create(array2);
             var calc = new DeterminantCalc();
-            var expected = new[] {
+            var expected = new BigInteger[] {
                 -67, 204
             };
 
@@ -271,7 +273,7 @@ namespace Calculator.Tests {
             var matrix1 = SquareMatrixFactory.Create(array1);
             var matrix2 = SquareMatrixFactory.Create(array2);
             var calc = new DeterminantCalc();
-            var expected = new[] {
+            var expected = new BigInteger[] {
                 -67, 204
             };
 
