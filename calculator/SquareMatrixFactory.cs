@@ -1,6 +1,6 @@
 ﻿namespace Calculator {
     public static class SquareMatrixFactory {
-        public static SquareMatrix Create(int size) => new SquareMatrixSource(size);
+        public static SquareMatrix Create(int size) => new SquareMatrix(size);
 
         public static SquareMatrix Create(int[,] array) {
             if (array is null) {
@@ -22,7 +22,7 @@
                 throw new SquareMatrixException();
             }
 
-            var result = new SquareMatrixSource(array.GetLength(0));
+            var result = new SquareMatrix(array.GetLength(0));
 
             for (var x = 0; x < size1; x++)
             for (var y = 0; y < size1; y++) {

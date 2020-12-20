@@ -122,6 +122,26 @@ namespace Calculator.Tests {
             Assert.That(actual, Is.EqualTo(expected));
         }
 
+        [Test]
+        public void ShouldCalcDeterminantOfSize4() {
+            // Arrange.
+            int[,] array = {
+                { 0, 0, 4, 2 },
+                { 1, 2, 9, 2 },
+                { 7, 2, 8, 5 },
+                { 6, 1, 4, 9 }
+            };
+            var matrix = SquareMatrixFactory.Create(array);
+            var calc = new DeterminantCalc();
+            var expected = -242;
+
+            // Act.
+            var actual = calc.CalcOne(matrix);
+
+            // Assert.
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
         [TestCase(8)]
         public void ShouldCalcDeterminantAsync(int size) {
             // Arrange.
@@ -277,7 +297,7 @@ namespace Calculator.Tests {
             // Act.
             sw.Start();
             var actualTask = calc.CalcManyAsync(tokenSource.Token, matrices);
-            Thread.Sleep(100);
+
             try {
                 tokenSource.Cancel();
                 actualTask.Wait();
