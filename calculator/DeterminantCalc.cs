@@ -66,7 +66,6 @@ namespace Calculator {
                 return this.CalcMatrixOfSize2(matrix);
             }
 
-            this.PrintMatrix(matrix, "Original");
             var triangleArray = this.MatrixToFractionalArray(matrix);
 
             if (!this.TryGetRowNonZero(triangleArray, 0, 0, out var rowNonZero)) {
@@ -78,7 +77,6 @@ namespace Calculator {
             token.ThrowIfCancellationRequested();
 
             try {
-                this.PrintMatrix(matrix, "Original fractional");
                 this.MakeTriangle(token, triangleArray, ref invert);
             } catch (DivideByZeroException) {
                 throw new DivideByZeroException();
@@ -105,7 +103,6 @@ namespace Calculator {
         }
 
         private void MakeTriangle(CancellationToken token, Fraction[,] triangleArray, ref bool invert) {
-            this.PrintMatrix(triangleArray, "Creating triangle");
             this.TryGetRowNonZero(triangleArray, 0, 0, out var rowNonZero);
 
             if (rowNonZero != 0) {
@@ -121,8 +118,6 @@ namespace Calculator {
 
         private void MakeZeroes(Fraction[,] triangleArray, int xy, ref bool invert) {
             for (var y = xy + 1; y < triangleArray.GetLength(0); y++) {
-                this.PrintMatrix(triangleArray, "Making zeroes");
-
                 if (triangleArray[xy, xy] == 0) {
                     if (!this.TryGetRowNonZero(triangleArray, xy, xy, out var validRow)) {
                         throw new DivideByZeroException();
@@ -137,8 +132,6 @@ namespace Calculator {
                 for (var x = xy; x < triangleArray.GetLength(0); x++) {
                     triangleArray[x, y] = triangleArray[x, y] - triangleArray[x, xy] * coefficient;
                 }
-
-                this.PrintMatrix(triangleArray, "Rows updated");
             }
         }
 
@@ -148,8 +141,6 @@ namespace Calculator {
                 triangleArray[i, from] = triangleArray[i, to];
                 triangleArray[i, to] = item;
             }
-
-            this.PrintMatrix(triangleArray, "Rows swapped");
         }
 
         private bool TryGetRowNonZero(Fraction[,] triangleArray, int x, int y, out int resultY) {
@@ -175,9 +166,5 @@ namespace Calculator {
         private BigInteger CalcMatrixOfSize2(SquareMatrix matrix) =>
             matrix[0, 0] * matrix[1, 1] -
             matrix[0, 1] * matrix[1, 0];
-
-        private void PrintMatrix(SquareMatrix matrix, string header) { }
-
-        private void PrintMatrix(Fraction[,] triangleArray, string header) { }
     }
 }
